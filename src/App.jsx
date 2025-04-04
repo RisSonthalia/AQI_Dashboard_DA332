@@ -25,6 +25,7 @@ import HistoricalHistogram from './components/HistoricalHistogram';
 import CigaretteEquivalentCard from './components/CigaretteEquivalentCard';
 import Footer from './components/Footer';
 import DarkModeToggle from './components/DarkModeToggle';
+import HealthRisksComponent from './components/HealthRisksComponent';
 // import HistoricalDataDisplay from './components/HistoricalDataDisplay';
 // Register Chart.js components
 ChartJS.register(
@@ -491,6 +492,8 @@ function App() {
   };
 
 
+
+
   const [chartType, setChartType] = useState('line');
 
   if (loading && !selectedStation) {
@@ -541,9 +544,16 @@ function App() {
             setChartType={setChartType}  // Add this prop
           />
 
+
           {pollutantData.pm2_5 && (
             <CigaretteEquivalentCard pm25Level={pollutantData.pm2_5} />
           )}
+
+
+          <div style={{ marginTop: '40px' }}>
+            <HealthRisksComponent currentAQI={currentAQI}  />;
+          </div>
+
         </div>
       )}
 

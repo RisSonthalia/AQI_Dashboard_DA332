@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-
+import LiveAQIIndicator from './LiveAQIIndicator';
 const AQIDisplay = ({ currentAQI, aqiCategory }) => {
     const [animatedAQI, setAnimatedAQI] = useState(0);
-    
+
     // Function to generate background gradient based on AQI value
     const getBackgroundGradient = (aqi) => {
         if (aqi === null) return 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'; // Default gradient
-        
+
         if (aqi <= 50) {
             // Good - Green gradient
             return 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
@@ -34,34 +34,34 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
             setAnimatedAQI(0);
             return;
         }
-        
+
         const startValue = animatedAQI || 0;
         const endValue = currentAQI;
         const duration = 1500; // Animation duration in ms
         const startTime = Date.now();
-        
+
         const animateValue = () => {
             const now = Date.now();
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Easing function for smooth animation
             const easeOut = t => 1 - Math.pow(1 - t, 3);
             const easedProgress = easeOut(progress);
-            
+
             const value = startValue + (endValue - startValue) * easedProgress;
             setAnimatedAQI(value);
-            
+
             if (progress < 1) {
                 requestAnimationFrame(animateValue);
             }
         };
-        
+
         requestAnimationFrame(animateValue);
     }, [currentAQI]);
 
     return (
-        <div 
+        <div
             className="aqi-display"
             style={{
                 background: getBackgroundGradient(currentAQI),
@@ -74,6 +74,10 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                 animation: 'gradientShift 10s ease infinite',
             }}
         >
+            {/* Live AQI indicator */}
+            <LiveAQIIndicator />
+
+
             {/* Animated background bubbles */}
             <div className="animated-background" style={{
                 position: 'absolute',
@@ -86,7 +90,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                 opacity: 0.4
             }}>
                 {[...Array(6)].map((_, i) => (
-                    <div 
+                    <div
                         key={i}
                         style={{
                             position: 'absolute',
@@ -102,7 +106,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                     />
                 ))}
             </div>
-            
+
             {/* Content Container */}
             <div style={{ position: 'relative', zIndex: 1 }}>
                 <div
@@ -126,7 +130,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                     }}
                 >
                     {/* Dial Marker */}
-                    <div 
+                    <div
                         style={{
                             position: 'absolute',
                             width: '8px',
@@ -141,7 +145,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                             transition: 'transform 0.3s ease'
                         }}
                     >
-                        <div 
+                        <div
                             style={{
                                 width: '16px',
                                 height: '16px',
@@ -155,8 +159,8 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                             }}
                         />
                     </div>
-                    
-                    <div 
+
+                    <div
                         className="aqi-value"
                         style={{
                             background: '#fff',
@@ -176,7 +180,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                         }}
                     >
                         {currentAQI !== null ? Math.round(animatedAQI) : '--'}
-                        <div 
+                        <div
                             className="aqi-label"
                             style={{
                                 fontSize: '1rem',
@@ -188,8 +192,8 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                         </div>
                     </div>
                 </div>
-                
-                <div 
+
+                <div
                     className="aqi-category"
                     style={{
                         textAlign: 'center',
@@ -199,8 +203,8 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                 >
                     {aqiCategory && (
                         <>
-                            <h3 
-                                style={{ 
+                            <h3
+                                style={{
                                     color: currentAQI > 200 ? '#fff' : aqiCategory.color,
                                     fontSize: '1.5rem',
                                     margin: '0 0 10px',
@@ -209,18 +213,18 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                             >
                                 {aqiCategory.level}
                             </h3>
-                            <p style={{ 
-                                margin: '0', 
+                            <p style={{
+                                margin: '0',
                                 lineHeight: '1.4',
-                                animation: 'fadeIn 1.5s ease-in' 
+                                animation: 'fadeIn 1.5s ease-in'
                             }}>
                                 {aqiCategory.healthImplications}
                             </p>
                         </>
                     )}
                 </div>
-                
-                <div 
+
+                <div
                     className="aqi-container"
                     style={{
                         background: 'rgba(255, 255, 255, 0.85)',
@@ -231,7 +235,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                     }}
                 >
                     <div className="aqi-background">
-                        <div 
+                        <div
                             className="category-labels"
                             style={{
                                 display: 'flex',
@@ -248,7 +252,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                             <div className="category-label">Hazardous</div>
                         </div>
 
-                        <div 
+                        <div
                             className="gradient-bar"
                             style={{
                                 height: '20px',
@@ -261,7 +265,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                         >
                             <div
                                 className="indicator"
-                                style={{ 
+                                style={{
                                     position: 'absolute',
                                     width: '12px',
                                     height: '24px',
@@ -276,7 +280,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                             ></div>
                         </div>
 
-                        <div 
+                        <div
                             className="value-markers"
                             style={{
                                 display: 'flex',
@@ -296,7 +300,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                 </div>
             </div>
 
-            {/* CSS Animations */}
+            {/* CSS Animations and Styles */}
             <style jsx>{`
                 @keyframes pulse {
                     0% { transform: scale(1); }
@@ -331,6 +335,24 @@ const AQIDisplay = ({ currentAQI, aqiCategory }) => {
                 @keyframes slideUp {
                     0% { transform: translateY(20px); opacity: 0; }
                     100% { transform: translateY(0); opacity: 1; }
+                }
+
+                @keyframes blink {
+                    0% { opacity: 1; }
+                    50% { opacity: 0; }
+                    100% { opacity: 1; }
+                }
+
+                .live-indicator {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background-color: red;
+                    animation: blink 1s infinite;
+                    z-index: 10;
                 }
             `}</style>
         </div>

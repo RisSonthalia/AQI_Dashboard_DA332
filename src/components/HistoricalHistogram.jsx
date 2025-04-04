@@ -6,14 +6,29 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPollutant }) => {
-  // Get color based on AQI value
+  
+  // Define pollutant-specific thresholds and colors
+  const pollutantThresholds = {
+    aqi: [50, 100, 150, 200, 300], // AQI breakpoints
+    pm2_5: [12, 35, 55, 150, 250], // PM2.5 in µg/m³
+    pm10: [54, 154, 254, 354, 424], // PM10 in µg/m³
+    o3: [55, 125, 165, 205, 405], // Ozone in ppb
+    no2: [53, 100, 360, 649, 1249], // NO2 in ppb
+    so2: [35, 75, 185, 304, 604], // SO2 in ppb
+    co: [4.4, 9.4, 12.4, 15.4, 30.4], // CO in ppm
+    no: [40, 80, 200, 400, 600], // NO in ppb
+    nh3: [200, 400, 800, 1200, 1600], // NH3 in ppb
+  };
+
+  const colors = ['#A8E05F', '#FDD74B', '#FB9B57', '#F66A67', '#A97ABC', '#A87383']; // Colors from Good to Hazardous
+
+  // Get color based on value for the selected pollutant
   const getBarColor = (value) => {
-    if (value <= 50) return '#A8E05F'; // Good
-    if (value <= 100) return '#FDD74B'; // Moderate
-    if (value <= 150) return '#FB9B57'; // Unhealthy for Sensitive Groups
-    if (value <= 200) return '#F66A67'; // Unhealthy
-    if (value <= 300) return '#A97ABC'; // Very Unhealthy
-    return '#A87383'; // Hazardous
+    const thresholds = pollutantThresholds[selectedPollutant] || pollutantThresholds.aqi; // Default to AQI if unknown
+    for (let i = 0; i < thresholds.length; i++) {
+      if (value <= thresholds[i]) return colors[i];
+    }
+    return colors[colors.length - 1]; // Highest category
   };
 
   // Format data for Chart.js
@@ -33,7 +48,6 @@ const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPol
       };
     }
 
-    // Use the actual data from historicalData
     return {
       labels: historicalData.labels,
       datasets: [
@@ -50,120 +64,15 @@ const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPol
 
   // Chart data
   const chartData = prepareChartData();
-  
-  // Format time string for display
-  const formatTimeString = (timeString) => {
-    try {
-      // Parse the time string
-      // Expected format could be "YYYY-MM-DD HH:MM:SS" or "HH:MM:SS AM/PM"
-      const timeParts = timeString.split(' ');
-      
-      // Extract time part
-      let timePortion;
-      if (timeParts.length >= 2) {
-        // If there's a date and time, get just the time
-        timePortion = timeParts[1];
-      } else {
-        // If it's just a time string
-        timePortion = timeParts[0];
-      }
-      
-      // Extract hours, minutes, seconds
-      const timeComponents = timePortion.split(':');
-      if (timeComponents.length < 2) return timeString; // Invalid format
-      
-      let hours = parseInt(timeComponents[0]);
-      const minutes = timeComponents[1];
-      let period = '';
-      
-      // Determine AM/PM
-      if (timeString.includes('AM') || timeString.includes('PM')) {
-        period = timeString.includes('PM') ? 'PM' : 'AM';
-      } else {
-        // Convert 24-hour format to 12-hour for display
-        if (hours >= 12) {
-          period = 'PM';
-          if (hours > 12) hours -= 12;
-        } else {
-          period = 'AM';
-          if (hours === 0) hours = 12;
-        }
-      }
-      
-      return `${hours}:${minutes} ${period}`;
-    } catch (e) {
-      return timeString; // Fallback to original
-    }
-  };
 
-  // Chart options
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        backgroundColor: 'rgba(32, 37, 43, 0.9)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: false,
-        callbacks: {
-          title: (tooltipItems) => {
-            // Use the formatTimeString function for consistent formatting
-            return formatTimeString(tooltipItems[0].label);
-          },
-          label: (context) => {
-            return `${selectedPollutant.toUpperCase()}: ${context.raw.toFixed(1)}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: '#8E9BAE',
-          font: {
-            size: 11,
-          },
-          maxRotation: 45,
-          autoSkip: false, // Show all labels
-          callback: function(value, index) {
-            // Use the formatTimeString function for consistent formatting
-            const timeString = this.getLabelForValue(value);
-            return formatTimeString(timeString);
-          }
-        }
-      },
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(142, 155, 174, 0.15)',
-        },
-        ticks: {
-          color: '#8E9BAE',
-          font: {
-            size: 11,
-          },
-          stepSize: 20,
-        },
-        title: {
-          display: true,
-          text: selectedPollutant.toUpperCase(),
-          color: '#8E9BAE',
-          font: {
-            size: 12,
-          }
-        }
-      }
-    }
-  };
+  // Calculate min and max values for the selected pollutant over the last 24 hours
+  let minValue = null;
+  let maxValue = null;
+  if (historicalData && historicalData[selectedPollutant] && historicalData[selectedPollutant].length > 0) {
+    const dataArray = historicalData[selectedPollutant];
+    minValue = Math.min(...dataArray);
+    maxValue = Math.max(...dataArray);
+  }
 
   return (
     <div className="historical-chart">
@@ -175,21 +84,37 @@ const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPol
           onChange={(e) => setSelectedPollutant(e.target.value)}
           className="pollutant-select"
         >
-          <option value="aqi">AQI</option>
-          <option value="pm2_5">PM2.5</option>
-          <option value="pm10">PM10</option>
-          <option value="o3">O3</option>
-          <option value="no2">NO2</option>
-          <option value="so2">SO2</option>
-          <option value="co">CO</option>
-          <option value="no">NO</option>
-          <option value="nh3">NH3</option>
+          {Object.keys(pollutantThresholds).map((pollutant) => (
+            <option key={pollutant} value={pollutant}>{pollutant.toUpperCase()}</option>
+          ))}
         </select>
       </div>
       
-      <div className="chart-container">
-        {chartData.labels && chartData.labels.length > 0 ? (
-          <Bar data={chartData} options={chartOptions} height={300} />
+      <div className="chart-container" style={{ position: 'relative' }}>
+        {/* Display min/max stats if data is available */}
+        {minValue !== null && maxValue !== null && (
+          <div 
+            className="chart-stats" 
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              padding: '10px 15px',
+              borderRadius: '6px',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+              fontSize: '0.9rem',
+              color: '#fff',
+              fontWeight: 'bold',
+              background: `linear-gradient(135deg, ${getBarColor(maxValue)}, ${getBarColor(minValue)})`,
+            }}
+          >
+            <div>🔺 Max {selectedPollutant.toUpperCase()}: {maxValue}</div>
+            <div>🔻 Min {selectedPollutant.toUpperCase()}: {minValue}</div>
+          </div>
+        )}
+        
+        {chartData.labels.length > 0 ? (
+          <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} height={300} />
         ) : (
           <div className="no-data">No data available</div>
         )}

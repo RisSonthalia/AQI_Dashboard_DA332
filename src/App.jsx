@@ -166,6 +166,17 @@ function App() {
     return aqiCategories[aqiCategories.length - 1];
   };
 
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (selectedStation) {
+  //       handleRefresh();
+  //     }
+  //   }, 300000);
+
+  //   return () => clearInterval(interval);
+  // }, [selectedStation]);
+
+
   // Load station data from CSV
   useEffect(() => {
     const loadStations = async () => {

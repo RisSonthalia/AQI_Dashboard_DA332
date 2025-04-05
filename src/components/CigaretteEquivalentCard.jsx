@@ -23,20 +23,36 @@ const CigaretteEquivalentCard = ({ pm25Level }) => {
           <span style={{ fontSize: '1rem', color: '#f56565' }}>Cigarettes</span>
           <span style={{ fontSize: '1rem', color: '#f56565' }}>per day</span>
         </div>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', marginRight: '20px' }}>
           {/* Simple SVG cigarette icon */}
-          <svg width="30" height="100" viewBox="0 0 30 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="5" y="20" width="20" height="80" fill="white" />
-            <rect x="5" y="5" width="20" height="15" fill="#D4A76A" />
-            <path d="M15 0C12 0 8 1 8 5H22C22 1 18 0 15 0Z" fill="#D4A76A" />
-            <path d="M8 20C8 20 12 25 15 25C18 25 22 20 22 20H8Z" fill="#D4A76A" />
-            <g opacity="0.5">
-              <path d="M15 25C18 30 12 35 15 40C18 45 12 50 15 55" stroke="#CCCCCC" strokeWidth="1" />
-            </g>
-          </svg>
-        </div>
+          <svg width="200" height="120" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          
+            <rect width="200" height="120"  />
+
+            
+            <rect x="20" y="80" width="140" height="15" fill="white" stroke="black" stroke-width="0.5" />
+
+            
+            <rect x="20" y="80" width="30" height="15" fill="#D4A76A" />
+
+            
+            <path d="M160 80 L175 78 Q180 85 175 92 L160 95 Z" fill="darkred" />
+
+           
+            <circle cx="172" cy="85" r="5" fill="gray" />
+            <circle cx="170" cy="87" r="4" fill="lightgray" />
+
         
+            <circle cx="175" cy="65" r="10" fill="gray" opacity="0.5" />
+            <circle cx="180" cy="50" r="15" fill="gray" opacity="0.5" />
+            <circle cx="185" cy="35" r="12" fill="gray" opacity="0.5" />
+            <circle cx="190" cy="25" r="8" fill="gray" opacity="0.5" />
+            <circle cx="192" cy="20" r="5" fill="gray" opacity="0.5" />
+          </svg>
+
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
           <div>
             <span style={{ fontSize: '1.2rem' }}>Weekly</span>
@@ -46,7 +62,7 @@ const CigaretteEquivalentCard = ({ pm25Level }) => {
             </div>
           </div>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
           <div>
             <span style={{ fontSize: '1.2rem' }}>Monthly</span>
@@ -57,21 +73,21 @@ const CigaretteEquivalentCard = ({ pm25Level }) => {
           </div>
         </div>
       </div>
-      
+
       <div style={{ marginTop: '20px' }}>
         <p>Breathing the air in this location is as harmful as smoking {cigarettesPerDay} cigarettes a day.</p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '10px' }}>
           <span style={{ marginRight: '10px' }}>Source:</span>
           <span style={{ color: '#9CA3AF' }}>Berkeley Earth</span>
-          <span 
-            style={{ 
-              marginLeft: '8px', 
-              border: '1px solid #9CA3AF', 
-              borderRadius: '50%', 
-              width: '20px', 
-              height: '20px', 
-              display: 'flex', 
-              alignItems: 'center', 
+          <span
+            style={{
+              marginLeft: '8px',
+              border: '1px solid #9CA3AF',
+              borderRadius: '50%',
+              width: '20px',
+              height: '20px',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               fontSize: '12px',
               position: 'relative',
@@ -96,7 +112,7 @@ const CigaretteEquivalentCard = ({ pm25Level }) => {
                 textAlign: 'center',
                 zIndex: '10'
               }}>
-                <strong>Berkeley Earth</strong><br/>
+                <strong>Berkeley Earth</strong><br />
                 According to Berkeley Earth’s rule of thumb, one cigarette per day is equivalent to 22 μg/m3 of PM2.5 level.
               </div>
             )}

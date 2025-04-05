@@ -97,8 +97,8 @@ const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPol
             className="chart-stats" 
             style={{
               position: 'absolute',
-              top: '10px',
-              right: '10px',
+              top: '-90px',
+              right: '20px',
               padding: '10px 15px',
               borderRadius: '6px',
               boxShadow: '0 2px 5px rgba(0,0,0,0.2)',

@@ -26,6 +26,7 @@ import CigaretteEquivalentCard from './components/CigaretteEquivalentCard';
 import Footer from './components/Footer';
 import DarkModeToggle from './components/DarkModeToggle';
 import HealthRisksComponent from './components/HealthRisksComponent';
+import CityStationsTable from './components/CityStationsTable';
 // import HistoricalDataDisplay from './components/HistoricalDataDisplay';
 // Register Chart.js components
 ChartJS.register(
@@ -53,7 +54,7 @@ function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
-    if (isDark) {
+    if (!isDark) {
       document.body.classList.add('dark-mode');
     } else {
       document.body.classList.remove('dark-mode');
@@ -166,6 +167,39 @@ function App() {
     }
     return aqiCategories[aqiCategories.length - 1];
   };
+  
+  // Helper to fetch data for a given station
+  const fetchStationData = async (station) => {
+    try {
+      const API_KEY = 'aac405e628f9c30a047d3de13192a7f7';
+
+      // Fetch air pollution data for pollutants (e.g., PM2.5, PM10)
+      const airResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${station.latitude}&lon=${station.longitude}&appid=${API_KEY}`
+      );
+
+      // Fetch weather data for temperature and humidity
+      const weatherResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${station.latitude}&lon=${station.longitude}&appid=${API_KEY}&units=metric`
+      );
+
+      const pollutants = airResponse.data.list[0].components;
+      const { temp, humidity } = weatherResponse.data.main;
+
+      return {
+        pm2_5: pollutants.pm2_5,
+        pm10: pollutants.pm10,
+        temp,         // Temperature in °C (using metric units)
+        hum: humidity // Humidity percentage
+      };
+    } catch (error) {
+      console.error('Error fetching station data:', error);
+      return {};
+    }
+  };
+
+
+
 
   // useEffect(() => {
   //   const interval = setInterval(() => {
@@ -450,7 +484,7 @@ function App() {
         .chart-select {
           background-color: #F7FAFC;
           border: 1px solid #E2E8F0;
-          border-radius: 25px; /* increased curvature */
+          border-radius: 35px; /* increased curvature */
           padding: 13px 14px;
           font-size: 14px;
           color: #2D3748;
@@ -466,13 +500,15 @@ function App() {
         }
         
         .chart-select:hover {
-          border-color: #CBD5E0;
+          border-color: #CBD5E0;\
           background-color: #EDF2F7;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
         }
         
         .chart-select:focus {
           outline: none;
+          border-radius: 25px;
           border-color: #4299E1;
           box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
         }
@@ -507,7 +543,7 @@ function App() {
   return (
     <div className="app">
       <button onClick={toggleDarkMode} className="dark-mode-button">
-        {isDark ? 'Light Mode' : 'Dark Mode'}
+        {isDark ? 'Dark Mode' : 'Light Mode'}
       </button>
 
 
@@ -543,7 +579,15 @@ function App() {
             chartType={chartType}     // Add this prop
             setChartType={setChartType}  // Add this prop
           />
-
+          {selectedStation && (
+            <CityStationsTable
+              selectedStation={selectedStation}
+              stations={stations}
+              calculateAQI={calculateAQI}
+              getAQICategory={getAQICategory}
+              fetchStationData={fetchStationData}
+            />
+          )}
 
           {pollutantData.pm2_5 && (
             <CigaretteEquivalentCard pm25Level={pollutantData.pm2_5} />
@@ -551,7 +595,7 @@ function App() {
 
 
           <div style={{ marginTop: '40px' }}>
-            <HealthRisksComponent currentAQI={currentAQI}  />;
+            <HealthRisksComponent currentAQI={currentAQI} />;
           </div>
 
         </div>

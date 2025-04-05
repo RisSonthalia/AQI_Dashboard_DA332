@@ -482,6 +482,9 @@ body {
   gap: 1rem;
 } */
 
+
+
+
 /* Responsive adjustments */
 @media (max-width: 1100px) {
   .cards-grid {

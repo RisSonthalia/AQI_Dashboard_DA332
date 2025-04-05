@@ -167,7 +167,7 @@ function App() {
     }
     return aqiCategories[aqiCategories.length - 1];
   };
-  
+
   // Helper to fetch data for a given station
   const fetchStationData = async (station) => {
     try {
@@ -561,40 +561,56 @@ function App() {
         <div className="dashboard">
           <StationInfo selectedStation={selectedStation} />
 
-          <div className="dashboard-grid" >
+          {/* <div className="dashboard-grid" >
             <AQIDisplay currentAQI={currentAQI} aqiCategory={aqiCategory} />
             <MapView selectedStation={selectedStation} currentAQI={currentAQI} />
+          </div> */}
+
+          <div style={{ display: 'flex', width: '100%' }}>
+            <div style={{ flex: '0 0 70%' }}>
+              <AQIDisplay currentAQI={currentAQI} aqiCategory={aqiCategory} />
+            </div>
+            <div style={{ flex: '0 0 30%', marginLeft: '10px', paddingRight: '10px' }}>
+              <MapView selectedStation={selectedStation} currentAQI={currentAQI} />
+            </div>
+          </div>
+
+          <div style={{ marginTop: '20px' }}>
             <PollutantCards pollutantData={pollutantData} />
-
-
           </div>
 
 
-          <HistoricalDataDisplay
-            historicalData={historicalData}
-            selectedPollutant={selectedPollutant}
-            setSelectedPollutant={setSelectedPollutant}
-            chartData={chartData}
-            chartOptions={chartOptions}
-            chartType={chartType}     // Add this prop
-            setChartType={setChartType}  // Add this prop
-          />
-          {selectedStation && (
-            <CityStationsTable
-              selectedStation={selectedStation}
-              stations={stations}
-              calculateAQI={calculateAQI}
-              getAQICategory={getAQICategory}
-              fetchStationData={fetchStationData}
+          <div style={{ marginTop: '20px' }}>
+            <HistoricalDataDisplay
+              historicalData={historicalData}
+              selectedPollutant={selectedPollutant}
+              setSelectedPollutant={setSelectedPollutant}
+              chartData={chartData}
+              chartOptions={chartOptions}
+              chartType={chartType}     // Add this prop
+              setChartType={setChartType}  // Add this prop
             />
-          )}
+          </div>
+
+          <div style={{marginTop: '-30px'}}>
+            {selectedStation && (
+              <CityStationsTable
+                selectedStation={selectedStation}
+                stations={stations}
+                calculateAQI={calculateAQI}
+                getAQICategory={getAQICategory}
+                fetchStationData={fetchStationData}
+              />
+            )}
+          </div>
+
 
           {pollutantData.pm2_5 && (
             <CigaretteEquivalentCard pm25Level={pollutantData.pm2_5} />
           )}
 
 
-          <div style={{ marginTop: '40px' }}>
+          <div style={{ marginTop: '20px' }}>
             <HealthRisksComponent currentAQI={currentAQI} />;
           </div>
 

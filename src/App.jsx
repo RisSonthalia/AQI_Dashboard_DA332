@@ -15,19 +15,19 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import Header from './components/Header';
-import StationInfo from './components/Stationinfo';
-import AQIDisplay from './components/AQIDisplay';
-import MapView from './components/MapView';
-import PollutantCards from './components/PollutantCards';
-import HistoricalChart from './components/HistoricalChart';
-import HistoricalHistogram from './components/HistoricalHistogram';
-import CigaretteEquivalentCard from './components/CigaretteEquivalentCard';
-import Footer from './components/Footer';
-import DarkModeToggle from './components/DarkModeToggle';
-import HealthRisksComponent from './components/HealthRisksComponent';
-import CityStationsTable from './components/CityStationsTable';
-// import HistoricalDataDisplay from './components/HistoricalDataDisplay';
+import Header from './components/real-time-main-page/Header';
+import StationInfo from './components/real-time-main-page/Stationinfo';
+import AQIDisplay from './components/real-time-main-page/AQIDisplay';
+import MapView from './components/real-time-main-page/MapView';
+import PollutantCards from './components/real-time-main-page/PollutantCards';
+import HistoricalChart from './components/real-time-main-page/HistoricalChart';
+import HistoricalHistogram from './components/real-time-main-page/HistoricalHistogram';
+import CigaretteEquivalentCard from './components/real-time-main-page/CigaretteEquivalentCard';
+import Footer from './components/real-time-main-page/Footer';
+import DarkModeToggle from './components/real-time-main-page/DarkModeToggle';
+import HealthRisksComponent from './components/real-time-main-page/HealthRisksComponent';
+import CityStationsTable from './components/real-time-main-page/CityStationsTable';
+// import HistoricalDataDisplay from './components/real-time-main-page/HistoricalDataDisplay';
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,

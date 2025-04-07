@@ -29,7 +29,10 @@ const MapView = ({ selectedStation, currentAQI }) => {
         </Marker>
         <ChangeMapView center={[selectedStation.latitude, selectedStation.longitude]} />
       </MapContainer>
+
+     
     </div>
+    
   );
 };
 

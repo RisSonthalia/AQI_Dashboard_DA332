@@ -8,7 +8,7 @@
 6,103,"Income Tax Office, Delhi - CPCB",Delhi,IN,28.6235,77.2494,Delhi
 7,235,"Anand Vihar, New Delhi - DPCC",Delhi,IN,28.646835,77.316032,Delhi
 8,236,"Mandir Marg, Delhi - DPCC",Delhi,IN,28.6341,77.2005,Delhi
-9,286,Collectorate - Gaya - BSPCB,BSPCB,IN,24.7489694,84.9438395,Bihar
+9,286,Collectorate - Gaya - BSPCB,Gaya,IN,24.7489694,84.9438395,Bihar
 10,301,"Vikas Sadan, Gurugram - HSPCB",Gurugram,IN,28.4501238,77.0263051,Haryana
 11,346,"MD University, Rohtak - HSPCB",Rohtak,IN,28.876028,76.619464,Haryana
 12,354,"Lalbagh, DN Park",DN Park,IN,26.84578611,80.93874444,Uttar Pradesh
@@ -18,7 +18,7 @@
 16,431,"IHBAS, Delhi - CPCB",Delhi,IN,28.6821,77.305,Delhi
 17,594,"BTM Layout, Bengaluru - KSPCB",Bengaluru,IN,12.91281111,77.60921944,Karnataka
 18,697,"Haldia, Haldia - WBPCB",Haldia,IN,22.06047,88.109737,West Bengal
-19,703,Collectorate Jodhpur - RSPCB,RSPCB,IN,26.2920639,73.03791111,Rajasthan
+19,703,Collectorate Jodhpur - RSPCB,Jodhpur,IN,26.2920639,73.03791111,Rajasthan
 20,716,"Rabindra Bharati University, Kolkata - WBSPCB",Kolkata,IN,22.627875,88.3804,West Bengal
 21,797,City Railway Station - KSPCB,KSPCB,IN,12.9773472,77.57069722,Karnataka
 22,854,Chandrapur,Chandrapur,IN,19.95,79.3,Maharashtra
@@ -32,7 +32,7 @@
 30,2461,US Diplomatic Post: Chennai,Chennai,IN,13.052371,80.251932,Tamil Nadu
 31,2463,Central School,School,IN,26.85272778,80.99632778,Uttar Pradesh
 32,2503,"Shadipur, Delhi - CPCB",Delhi,IN,28.6517,77.1581,Delhi
-33,2549,IIT,IIT,IN,12.99251389,80.23744722,Tamil Nadu
+33,2549,IIT,Chennai,IN,12.99251389,80.23744722,Tamil Nadu
 34,2583,"Sector-6, Panchkula - HSPCB ",Panchkula,IN,30.7057778,76.85318056,Haryana
 35,2585,AAQMS Karve Road Pune,Pune,IN,18.497484,73.81349,Maharashtra
 36,2586,"Manali, Chennai - CPCB",Chennai,IN,13.164544,80.26285,Tamil Nadu

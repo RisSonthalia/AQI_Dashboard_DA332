@@ -1,11 +1,10 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function TopBar({ isDark, toggleDarkMode, navigateToHome = '/' }) {
-
-
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   const handleNavigation = (path) => {
     navigate(path, {
@@ -13,6 +12,10 @@ function TopBar({ isDark, toggleDarkMode, navigateToHome = '/' }) {
     });
   };
 
+  // Determine active button based on current path
+  const isActive = (path) => {
+    return currentPath === path;
+  };
 
   // Inline styles for the AQI logo
   const logoContainerStyle = {
@@ -58,30 +61,32 @@ function TopBar({ isDark, toggleDarkMode, navigateToHome = '/' }) {
 
       <div className="nav-buttons">
         <button
-          className="nav-button home-btn"
-          onClick={() => { }}>
+          className={`nav-button home-btn ${isActive('/') ? 'active' : ''}`}
+          onClick={() => handleNavigation('/')}>
           <svg xmlns="http://www.w3.org/2000/svg" className="nav-icon" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
           </svg>
           Home
         </button>
         <button
-          className="nav-button realtime-btn"
+          className={`nav-button realtime-btn ${isActive('/realtime') ? 'active' : ''}`}
           onClick={() => handleNavigation('/')}>
           <svg xmlns="http://www.w3.org/2000/svg" className="nav-icon" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.5-11a.5.5 0 00-1 0v4a.5.5 0 00.146.354l2.5 2.5a.5.5 0 10.708-.708L10.5 10.293V7z" clipRule="evenodd" />
           </svg>
           Real-time Analysis
         </button>
-        <button className="nav-button historical-btn" onClick={() => { }}>
+        <button 
+          className={`nav-button historical-btn ${isActive('/historical') ? 'active' : ''}`}
+          onClick={() => handleNavigation('/')}>
           <svg xmlns="http://www.w3.org/2000/svg" className="nav-icon" viewBox="0 0 20 20" fill="currentColor">
             <path d="M3 3a1 1 0 011-1h1a1 1 0 011 1v13a1 1 0 11-2 0V4H4a1 1 0 01-1-1zm5 4a1 1 0 011-1h1a1 1 0 011 1v9a1 1 0 11-2 0V7H9a1 1 0 01-1-1zm5-3a1 1 0 011-1h1a1 1 0 011 1v12a1 1 0 11-2 0V4h-1a1 1 0 01-1-1z" />
           </svg>
           Historical Analysis
         </button>
         <button
-          className="nav-button prediction-btn"
-          onClick={() => { }}
+          className={`nav-button prediction-btn ${isActive('/prediction') ? 'active' : ''}`}
+          onClick={() => handleNavigation('/')}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="nav-icon" viewBox="0 0 20 20" fill="currentColor">
             <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
@@ -90,7 +95,7 @@ function TopBar({ isDark, toggleDarkMode, navigateToHome = '/' }) {
           Prediction Model
         </button>
         <button
-          className="nav-button chatbot-btn"
+          className={`nav-button chatbot-btn ${isActive('/aqi-chatbot') ? 'active' : ''}`}
           onClick={() => handleNavigation('/aqi-chatbot')}
         >
           <svg
@@ -183,6 +188,35 @@ function TopBar({ isDark, toggleDarkMode, navigateToHome = '/' }) {
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         
+        /* Active button styles */
+        .nav-button.active {
+          transform: translateY(-3px);
+          box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+          position: relative;
+          font-weight: 700;
+          border: 2px solid white;
+        }
+        
+        .dark-mode .nav-button.active {
+          border: 2px solid #1a202c;
+        }
+        
+        .nav-button.active::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 8px;
+          height: 8px;
+          background-color: white;
+          border-radius: 50%;
+        }
+        
+        .dark-mode .nav-button.active::after {
+          background-color: #1a202c;
+        }
+        
         /* Button-specific colors */
         .home-btn {
           background-color: #4299e1;
@@ -209,23 +243,23 @@ function TopBar({ isDark, toggleDarkMode, navigateToHome = '/' }) {
           background-image: linear-gradient(135deg, #48bb78, #38a169);
         }
         
-        .home-btn:hover {
+        .home-btn:hover, .home-btn.active {
           background-image: linear-gradient(135deg, #3182ce, #2c5282);
         }
         
-        .realtime-btn:hover {
+        .realtime-btn:hover, .realtime-btn.active {
           background-image: linear-gradient(135deg, #319795, #2c7a7b);
         }
         
-        .historical-btn:hover {
+        .historical-btn:hover, .historical-btn.active {
           background-image: linear-gradient(135deg, #6b46c1, #553c9a);
         }
         
-        .prediction-btn:hover {
+        .prediction-btn:hover, .prediction-btn.active {
           background-image: linear-gradient(135deg, #dd6b20, #c05621);
         }
         
-        .chatbot-btn:hover {
+        .chatbot-btn:hover, .chatbot-btn.active {
           background-image: linear-gradient(135deg, #38a169, #2f855a);
         }
         
@@ -280,23 +314,23 @@ function TopBar({ isDark, toggleDarkMode, navigateToHome = '/' }) {
           background-image: linear-gradient(135deg, #2f855a, #276749);
         }
         
-        .dark-mode .home-btn:hover {
+        .dark-mode .home-btn:hover, .dark-mode .home-btn.active {
           background-image: linear-gradient(135deg, #2c5282, #1a365d);
         }
         
-        .dark-mode .realtime-btn:hover {
+        .dark-mode .realtime-btn:hover, .dark-mode .realtime-btn.active {
           background-image: linear-gradient(135deg, #285e61, #234e52);
         }
         
-        .dark-mode .historical-btn:hover {
+        .dark-mode .historical-btn:hover, .dark-mode .historical-btn.active {
           background-image: linear-gradient(135deg, #44337a, #322659);
         }
         
-        .dark-mode .prediction-btn:hover {
+        .dark-mode .prediction-btn:hover, .dark-mode .prediction-btn.active {
           background-image: linear-gradient(135deg, #9c4221, #7b341e);
         }
         
-        .dark-mode .chatbot-btn:hover {
+        .dark-mode .chatbot-btn:hover, .dark-mode .chatbot-btn.active {
           background-image: linear-gradient(135deg, #276749, #1e4e3b);
         }
         

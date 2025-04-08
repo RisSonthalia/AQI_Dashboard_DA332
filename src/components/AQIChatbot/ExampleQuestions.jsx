@@ -6,7 +6,7 @@ function ExampleQuestions({ onSelectQuestion, isDisabled }) {
     "What was the average PM2.5 level in Delhi during winter 2023?",
     "Which city had the worst air quality in 2022?",
     "How does Mumbai's air quality compare to Chennai?",
-    "Show me trends in NO2 levels in Bangalore from 2020 to 2024",
+    "Show me trends in PM10 and PM2.5 levels in Bengaluru from 2020 to 2024",
     "What are the seasonal patterns of air pollution in Kolkata?",
     "Which stations recorded the highest SO2 levels in 2023?",
     "How has air quality in Delhi changed over the past 5 years?",

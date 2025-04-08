@@ -165,25 +165,25 @@ function AQIChatbot() {
         {/* Header */}
         <TopBar isDark={darkMode} toggleDarkMode={toggleDarkMode} />
 
-        <div className="header">
+        {/* <div className="header">
           <div className="header-content">
             <div className="header-left">
               <button className="hamburger-menu" onClick={toggleSidebar} aria-label="Menu">
                 <MenuIcon />
               </button>
               <h1 className="app-title">
-                <span className="gradient-text">Air Quality Intelligence Chatbot</span>
+                <span className="gradient-text">AQI <b>Chatbot</b></span>
               </h1>
             </div>
 
           </div>
-        </div>
+        </div> */}
 
         <div className="main-container">
           {/* Sidebar with Examples */}
           <div className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
             <div className="sidebar-header">
-              <h3 className="sidebar-title">Example Questions</h3>
+              <h3 className="sidebar-title">AQI Chatbot</h3>
               <button className="close-sidebar" onClick={toggleSidebar}>
                 <CloseIcon />
               </button>

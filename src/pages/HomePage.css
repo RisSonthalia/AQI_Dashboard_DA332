@@ -1,311 +1,40 @@
-/* IndiaAQIHeatmap.css */
+/* HomePage.css */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7fafc;
+  color: #1a202c;
+}
 
-/* Global styles */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
-    transition: background-color 0.3s ease, color 0.3s ease;
+.app.dark-mode {
+  background-color: #1a202c;
+  color: #f7fafc;
+}
+
+.content-container {
+  flex: 1;
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.full-width-map {
+  max-width: 100%;
+  padding: 1rem;
+}
+
+/* Media query for larger screens */
+@media (min-width: 1200px) {
+  .full-width-map {
+    padding: 1rem 2rem;
   }
-  
-  body.dark-mode {
-    /* background-color: #121212; */
-    color: #f5f5f5;
+}
+
+/* Ensure the map doesn't get too small on mobile */
+@media (max-width: 640px) {
+  .full-width-map {
+    padding: 0.5rem;
   }
-  
-  .app {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  
-  .content {
-    flex: 1;
-    padding: 20px;
-    max-width: 1600px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  /* Header styles */
-  .header {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .header h1 {
-    margin: 0;
-    font-size: 2.5rem;
-    color: #2e7d32;
-  }
-  
-  body.dark-mode .header h1 {
-    color: #4caf50;
-  }
-  
-  .header p {
-    margin: 10px 0;
-    font-size: 1.1rem;
-    color: #555;
-  }
-  
-  body.dark-mode .header p {
-    color: #aaa;
-  }
-  
-  .last-updated {
-    font-size: 0.9rem;
-    color: #666;
-    font-style: italic;
-  }
-  
-  body.dark-mode .last-updated {
-    color: #999;
-  }
-  
-  /* Map container styles */
-  .map-container {
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
-  }
-  
-  body.dark-mode .map-container {
-    background-color: #1e1e1e;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-  
-  .map {
-    height: 600px;
-    width: 100%;
-    z-index: 1;
-  }
-  
-  /* Loading overlay */
-  .loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-  }
-  
-  body.dark-mode .loading-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
-  }
-  
-  .loader {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #2e7d32;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-  }
-  
-  body.dark-mode .loader {
-    border: 5px solid #333;
-    border-top: 5px solid #4caf50;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Map controls */
-  .map-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .control-button {
-    padding: 8px 16px;
-    background-color: #fff;
-    border: none;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    font-weight: 600;
-    color: #2e7d32;
-    transition: all 0.2s ease;
-  }
-  
-  .control-button:hover {
-    background-color: #f0f0f0;
-    transform: translateY(-2px);
-  }
-  
-  body.dark-mode .control-button {
-    background-color: #333;
-    color: #4caf50;
-  }
-  
-  body.dark-mode .control-button:hover {
-    background-color: #444;
-  }
-  
-  /* Map legend */
-  .map-legend {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 5px;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    max-width: 300px;
-    z-index: 2;
-  }
-  
-  body.dark-mode .map-legend {
-    background-color: rgba(30, 30, 30, 0.9);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-  }
-  
-  .map-legend h3 {
-    margin: 0 0 10px 0;
-    font-size: 1rem;
-    color: #333;
-  }
-  
-  body.dark-mode .map-legend h3 {
-    color: #fff;
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    font-size: 0.85rem;
-  }
-  
-  .legend-color {
-    display: inline-block;
-    width: 20px;
-    height: 15px;
-    margin-right: 10px;
-    border-radius: 2px;
-  }
-  
-  /* Map pin marker styles */
-  .custom-map-pin {
-    position: relative;
-    pointer-events: none;
-  }
-  
-  .pin-container {
-    position: relative;
-    width: 30px;
-    height: 42px;
-  }
-  
-  .pin {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 20px;
-    border-radius: 50% 50% 50% 0;
-    background: #ff0000;
-    transform: rotate(-45deg);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  }
-  
-  .pin:after {
-    content: '';
-    width: 10px;
-    height: 10px;
-    margin: 5px 0 0 5px;
-    background: #fff;
-    position: absolute;
-    border-radius: 50%;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
-  }
-  
-  .pin-inner {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  
-  .pin-shadow {
-    position: absolute;
-    width: 12px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.2);
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  /* Station popup styles */
-  .station-popup {
-    padding: 8px;
-    min-width: 200px;
-  }
-  
-  .station-popup h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.1rem;
-    color: #2e7d32;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-  }
-  
-  .station-popup p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-  }
-  
-  .station-popup strong {
-    font-weight: 600;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .content {
-      padding: 10px;
-    }
-    
-    .header h1 {
-      font-size: 1.8rem;
-    }
-    
-    .header p {
-      font-size: 1rem;
-    }
-    
-    .map {
-      height: 450px;
-    }
-    
-    .map-legend {
-      max-width: 200px;
-      padding: 8px;
-      bottom: 10px;
-      right: 10px;
-    }
-    
-    .legend-item {
-      font-size: 0.75rem;
-    }
-  }
+}

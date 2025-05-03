@@ -223,6 +223,7 @@ const AQIDisplay = ({ currentAQI, aqiCategory, weatherData }) => {
                             <div
                                 className="aqi-label"
                                 style={{
+                                    color :'black',
                                     fontSize: '1rem',
                                     fontWeight: 'normal',
                                     marginTop: '5px'

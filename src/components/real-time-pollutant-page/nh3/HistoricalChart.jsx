@@ -10,15 +10,15 @@ const HistoricalChart = ({ historicalData, selectedPollutant, setSelectedPolluta
 
   // Define pollutant-specific thresholds and colors
   const pollutantThresholds = {
-    aqi: [50, 100, 150, 200, 300],
-    pm2_5: [12, 35, 55, 150, 250],
-    pm10: [54, 154, 254, 354, 424],
-    o3: [55, 125, 165, 205, 405],
-    no2: [53, 100, 360, 649, 1249],
-    so2: [35, 75, 185, 304, 604],
-    co: [4.4, 9.4, 12.4, 15.4, 30.4],
-    no: [40, 80, 200, 400, 600],
-    nh3: [200, 400, 800, 1200, 1600],
+    aqi: [50, 100, 150, 200, 300], // AQI breakpoints
+    pm2_5: [50, 100, 250, 350, 450], // PM2.5 in µg/m³
+    pm10: [50, 100, 250, 350, 450], // PM10 in µg/m³
+    o3: [50, 100, 162, 208, 748], // Ozone in ppb
+    no2: [50, 100, 150, 200, 300], // NO2 in ppb
+    so2: [40, 80, 380, 800, 1600], // SO2 in ppb
+    co: [8330, 16670, 25000, 33330, 41670], // CO in ppm
+    no: [40, 80, 200, 400, 600], // NO in ppb
+    nh3: [200, 400, 800, 1200, 1600], // NH3 in ppb
   };
 
   const colors = ['#A8E05F', '#FDD74B', '#FB9B57', '#F66A67', '#A97ABC', '#A87383'];
@@ -91,7 +91,7 @@ const HistoricalChart = ({ historicalData, selectedPollutant, setSelectedPolluta
   return (
     <div className="historical-chart">
       <h2 className="chart-title">Historical Air Quality Data</h2>
-      
+
       {/* <div className="chart-controls">
         <select
           value={selectedPollutant}
@@ -107,8 +107,8 @@ const HistoricalChart = ({ historicalData, selectedPollutant, setSelectedPolluta
       <div className="chart-container" style={{ position: 'relative' }}>
         {/* Display Min/Max Stats */}
         {minValue !== null && maxValue !== null && (
-          <div 
-            className="chart-stats" 
+          <div
+            className="chart-stats"
             style={{
               position: 'absolute',
               top: '-60px',

@@ -189,7 +189,7 @@ function AQIChatbot() {
               </button>
             </div>
             <div className="sidebar-content">
-              <ExampleQuestions onSelectQuestion={handleExampleQuestion} isDisabled={isProcessing} />
+              <ExampleQuestions onSelectQuestion={handleExampleQuestion} isDisabled={isProcessing} isDarkMode={darkMode} />
             </div>
           </div>
 

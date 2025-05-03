@@ -183,6 +183,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         <div
                             className="aqi-label"
                             style={{
+                                color :'black',
                                 fontSize: '1rem',
                                 fontWeight: 'normal',
                                 marginTop: '5px'

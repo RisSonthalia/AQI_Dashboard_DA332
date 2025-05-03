@@ -6,20 +6,19 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPollutant }) => {
-  
+
   // Define pollutant-specific thresholds and colors
   const pollutantThresholds = {
     aqi: [50, 100, 150, 200, 300], // AQI breakpoints
-    pm2_5: [12, 35, 55, 150, 250], // PM2.5 in µg/m³
-    pm10: [54, 154, 254, 354, 424], // PM10 in µg/m³
-    o3: [55, 125, 165, 205, 405], // Ozone in ppb
-    no2: [53, 100, 360, 649, 1249], // NO2 in ppb
-    so2: [35, 75, 185, 304, 604], // SO2 in ppb
-    co: [4.4, 9.4, 12.4, 15.4, 30.4], // CO in ppm
+    pm2_5: [50, 100, 250, 350, 450], // PM2.5 in µg/m³
+    pm10: [50, 100, 250, 350, 450], // PM10 in µg/m³
+    o3: [50, 100, 162, 208, 748], // Ozone in ppb
+    no2: [50, 100, 150, 200, 300], // NO2 in ppb
+    so2: [40, 80, 380, 800, 1600], // SO2 in ppb
+    co: [8330, 16670, 25000, 33330, 41670], // CO in ppm
     no: [40, 80, 200, 400, 600], // NO in ppb
     nh3: [200, 400, 800, 1200, 1600], // NH3 in ppb
   };
-
   const colors = ['#A8E05F', '#FDD74B', '#FB9B57', '#F66A67', '#A97ABC', '#A87383']; // Colors from Good to Hazardous
 
   // Get color based on value for the selected pollutant
@@ -77,7 +76,7 @@ const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPol
   return (
     <div className="historical-chart">
       <h2 className="chart-title">Historical Air Quality Data</h2>
-      
+
       {/* <div className="chart-controls">
         <select
           value={selectedPollutant}
@@ -89,12 +88,12 @@ const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPol
           ))}
         </select>
       </div> */}
-      
+
       <div className="chart-container" style={{ position: 'relative' }}>
         {/* Display min/max stats if data is available */}
         {minValue !== null && maxValue !== null && (
-          <div 
-            className="chart-stats" 
+          <div
+            className="chart-stats"
             style={{
               position: 'absolute',
               top: '-60px',
@@ -112,7 +111,7 @@ const HistoricalHistogram = ({ historicalData, selectedPollutant, setSelectedPol
             <div>🔻 Min {selectedPollutant.toUpperCase()}: {minValue}</div>
           </div>
         )}
-        
+
         {chartData.labels.length > 0 ? (
           <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} height={300} />
         ) : (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Button, List, ListItem } from '@mui/material';
 
-function ExampleQuestions({ onSelectQuestion, isDisabled }) {
+function ExampleQuestions({ onSelectQuestion, isDisabled, isDarkMode }) {
   const exampleQuestions = [
     "What was the average PM2.5 level in Delhi during winter 2023?",
     "Which city had the worst air quality in 2022?",
@@ -13,9 +13,12 @@ function ExampleQuestions({ onSelectQuestion, isDisabled }) {
     "What's the correlation between PM10 and PM2.5 in industrial cities?"
   ];
 
+  // Define text color based on dark mode
+  const textColor = isDarkMode ? "white" : "black";
+
   return (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>
+      <Typography variant="h6" sx={{ mb: 2, color: textColor }}>
         Example Questions
       </Typography>
       <List>
@@ -25,7 +28,16 @@ function ExampleQuestions({ onSelectQuestion, isDisabled }) {
               fullWidth
               variant="outlined"
               size="small"
-              sx={{ justifyContent: 'flex-start', textAlign: 'left', textTransform: 'none' }}
+              sx={{ 
+                justifyContent: 'flex-start', 
+                textAlign: 'left', 
+                textTransform: 'none',
+                color: textColor,
+                borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
+                '&:hover': {
+                  borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'
+                }
+              }}
               onClick={() => onSelectQuestion(question)}
               disabled={isDisabled}
             >

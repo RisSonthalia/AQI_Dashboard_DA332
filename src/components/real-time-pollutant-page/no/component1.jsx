@@ -3,9 +3,9 @@ import './Component1.css'; // Import the CSS file
 
 const Component1 = ({ pm25Value }) => {
   // Use 58 as default if no pm25Value is provided
-  const actualPm25Value = pm25Value || 58;
+  const actualPm25Value = pm25Value || 0;
   const whoGuideline = 15;
-  let timesAboveWHO = 1;
+  let timesAboveWHO = 0;
   if (pm25Value != 0) {
      timesAboveWHO = (actualPm25Value / whoGuideline).toFixed(1);
   }
@@ -69,7 +69,7 @@ const Component1 = ({ pm25Value }) => {
             </div>
             <div className="who-info" >
               <p>
-                The current PM2.5 level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
+                The current NO level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
                 <span className="who-value">{whoGuideline} µg/m³</span>.
               </p>
             </div>

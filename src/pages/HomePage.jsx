@@ -1,74 +1,78 @@
-// src/pages/Homepage.jsx
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Papa from 'papaparse';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet.heat/dist/leaflet-heat.js';
 import TopBar from '../components/real-time-main-page/TopBar';
-import Header from '../components/real-time-main-page/Header';
-import StationInfo from '../components/real-time-main-page/Stationinfo';
-import AQIDisplay from '../components/real-time-main-page/AQIDisplay';
-import MapView from '../components/real-time-main-page/MapView';
-import PollutantCards from '../components/real-time-main-page/PollutantCards';
-import HistoricalChart from '../components/real-time-main-page/HistoricalChart';
-import HistoricalHistogram from '../components/real-time-main-page/HistoricalHistogram';
-import CigaretteEquivalentCard from '../components/real-time-main-page/CigaretteEquivalentCard';
 import Footer from '../components/real-time-main-page/Footer';
-import HealthRisksComponent from '../components/real-time-main-page/HealthRisksComponent';
-import CityStationsTable from '../components/real-time-main-page/CityStationsTable';
-
 import './HomePage.css';
+import { Home } from 'lucide-react';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+// Center coordinates for India's map
+const INDIA_CENTER = [20.5937, 78.9629];
+const DEFAULT_ZOOM = 5;
+const API_KEY = 'aac405e628f9c30a047d3de13192a7f7';
+
+// AQI color scale
+const getAqiColor = (aqi) => {
+  if (aqi <= 50) return '#00e400'; // Good - Green
+  if (aqi <= 100) return '#ffff00'; // Moderate - Yellow
+  if (aqi <= 150) return '#ff7e00'; // Unhealthy for Sensitive Groups - Orange
+  if (aqi <= 200) return '#ff0000'; // Unhealthy - Red
+  if (aqi <= 300) return '#99004c'; // Very Unhealthy - Purple
+  return '#7e0023'; // Hazardous - Maroon
+};
+
+// Calculate AQI from pollutant values
+const calculateAQI = (pollutants) => {
+  // Simplified AQI calculation based on PM2.5
+  const pm25 = pollutants.pm2_5;
+  
+  if (pm25 <= 12) {
+    return Math.round((50 - 0) / (12 - 0) * (pm25 - 0) + 0);
+  } else if (pm25 <= 35.4) {
+    return Math.round((100 - 51) / (35.4 - 12.1) * (pm25 - 12.1) + 51);
+  } else if (pm25 <= 55.4) {
+    return Math.round((150 - 101) / (55.4 - 35.5) * (pm25 - 35.5) + 101);
+  } else if (pm25 <= 150.4) {
+    return Math.round((200 - 151) / (150.4 - 55.5) * (pm25 - 55.5) + 151);
+  } else if (pm25 <= 250.4) {
+    return Math.round((300 - 201) / (250.4 - 150.5) * (pm25 - 150.5) + 201);
+  } else {
+    return Math.round((500 - 301) / (500.4 - 250.5) * (pm25 - 250.5) + 301);
+  }
+};
+
+// Get AQI category
+const getAqiCategory = (aqi) => {
+  if (aqi <= 50) return 'Good';
+  if (aqi <= 100) return 'Moderate';
+  if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
+  if (aqi <= 200) return 'Unhealthy';
+  if (aqi <= 300) return 'Very Unhealthy';
+  return 'Hazardous';
+};
 
 function HomePage() {
-  // Retrieve passed state from the location (if any)
-  const location = useLocation();
-  const initialIsDark = location.state?.isdark ?? true;
-  const initialSelectedStation = location.state?.selectedStation || {
-    station_id: 361411,
-    name: 'IITG, Guwahati - PCBA',
-    latitude: 26.2028636,
-    longitude: 91.70046436,
-    city: 'Guwahati',
-    state:'Assam',
-    country: 'IN',
-    };
   const [stations, setStations] = useState([]);
-  const [selectedStation, setSelectedStation] = useState(initialSelectedStation);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredStations, setFilteredStations] = useState([]);
-  const [currentAQI, setCurrentAQI] = useState(null);
-  const [pollutantData, setPollutantData] = useState({});
-  const [weatherData, setWeatherData] = useState({});
-  const [historicalData, setHistoricalData] = useState({});
-  const [selectedPollutant, setSelectedPollutant] = useState('aqi');
-  const [loading, setLoading] = useState(initialIsDark);
+  const [stationsWithAqi, setStationsWithAqi] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isDark, setIsDark] = useState(initialIsDark);
+  const [isDark, setIsDark] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [chartType, setChartType] = useState('histogram');
-  const [stationsLoaded, setStationsLoaded] = useState(false);
-
-  // Toggle dark mode and update body class
+  const [showMarkers, setShowMarkers] = useState(true);
+  const [dataCache, setDataCache] = useState({
+    timestamp: null,
+    data: []
+  });
+  
+  const mapRef = useRef(null);
+  const leafletMap = useRef(null);
+  const heatLayer = useRef(null);
+  const markersLayer = useRef(null);
+  
+  // Toggle dark mode
   useEffect(() => {
     if (isDark) {
       document.body.classList.add('dark-mode');
@@ -78,182 +82,71 @@ function HomePage() {
   }, [isDark]);
 
   const toggleDarkMode = () => setIsDark(!isDark);
-
-  // AQI categories and helper functions...
-  const aqiCategories = [
-    {
-      range: [0, 50],
-      level: 'Good',
-      color: '#00e400',
-      healthImplications:
-        'Air quality is satisfactory, and air pollution poses little or no risk.',
-    },
-    {
-      range: [51, 100],
-      level: 'Moderate',
-      color: '#ffff00',
-      healthImplications:
-        'Air quality is acceptable. However, there may be a risk for some people, particularly those who are unusually sensitive to air pollution.',
-    },
-    {
-      range: [101, 150],
-      level: 'Unhealthy for Sensitive Groups',
-      color: '#ff7e00',
-      healthImplications:
-        'Members of sensitive groups may experience health effects. The general public is less likely to be affected.',
-    },
-    {
-      range: [151, 200],
-      level: 'Unhealthy',
-      color: '#ff0000',
-      healthImplications:
-        'Some members of the general public may experience health effects; members of sensitive groups may experience more serious health effects.',
-    },
-    {
-      range: [201, 300],
-      level: 'Very Unhealthy',
-      color: '#8f3f97',
-      healthImplications:
-        'Health alert: The risk of health effects is increased for everyone.',
-    },
-    {
-      range: [301, 500],
-      level: 'Hazardous',
-      color: '#7e0023',
-      healthImplications:
-        'Health warning of emergency conditions: everyone is more likely to be affected.',
-    },
-  ];
-
-  const mapAQI = (concentration, c_low, c_high, i_low, i_high) => {
-    return Math.round(
-      ((i_high - i_low) / (c_high - c_low)) * (concentration - c_low) + i_low
-    );
-  };
-
-  const calculateAQI = (pollutants) => {
-    const pm25 = pollutants.pm2_5 || 0;
-    const pm10 = pollutants.pm10 || 0;
-    const o3 = pollutants.o3 || 0;
-    const no2 = pollutants.no2 || 0;
-    const so2 = pollutants.so2 || 0;
-    const co = pollutants.co || 0;
-
-    const pm25AQI = calculatePM25AQI(pm25);
-    const pm10AQI = calculatePM10AQI(pm10);
-    const o3AQI = calculateO3AQI(o3);
-    const no2AQI = calculateNO2AQI(no2);
-    const so2AQI = calculateSO2AQI(so2);
-    const coAQI = calculateCOAQI(co);
-
-    return Math.max(pm25AQI, pm10AQI, o3AQI, no2AQI, so2AQI, coAQI);
-  };
-
-  const calculatePM25AQI = (concentration) => {
-    if (concentration <= 12) return mapAQI(concentration, 0, 12, 0, 50);
-    if (concentration <= 35.4)
-      return mapAQI(concentration, 12.1, 35.4, 51, 100);
-    if (concentration <= 55.4)
-      return mapAQI(concentration, 35.5, 55.4, 101, 150);
-    if (concentration <= 150.4)
-      return mapAQI(concentration, 55.5, 150.4, 151, 200);
-    if (concentration <= 250.4)
-      return mapAQI(concentration, 150.5, 250.4, 201, 300);
-    if (concentration <= 500.4)
-      return mapAQI(concentration, 250.5, 500.4, 301, 500);
-    return 500;
-  };
-
-  const calculatePM10AQI = (concentration) => {
-    if (concentration <= 54) return mapAQI(concentration, 0, 54, 0, 50);
-    if (concentration <= 154) return mapAQI(concentration, 55, 154, 51, 100);
-    if (concentration <= 254) return mapAQI(concentration, 155, 254, 101, 150);
-    if (concentration <= 354) return mapAQI(concentration, 255, 354, 151, 200);
-    if (concentration <= 424) return mapAQI(concentration, 355, 424, 201, 300);
-    if (concentration <= 604) return mapAQI(concentration, 425, 604, 301, 500);
-    return 500;
-  };
-
-  const calculateO3AQI = (concentration) => {
-    const ppb = concentration * 0.5;
-    if (ppb <= 54) return mapAQI(ppb, 0, 54, 0, 50);
-    if (ppb <= 70) return mapAQI(ppb, 55, 70, 51, 100);
-    if (ppb <= 85) return mapAQI(ppb, 71, 85, 101, 150);
-    if (ppb <= 105) return mapAQI(ppb, 86, 105, 151, 200);
-    if (ppb <= 200) return mapAQI(ppb, 106, 200, 201, 300);
-    return 500;
-  };
-
-  const calculateNO2AQI = (concentration) => {
-    const ppb = concentration * 0.53;
-    if (ppb <= 53) return mapAQI(ppb, 0, 53, 0, 50);
-    if (ppb <= 100) return mapAQI(ppb, 54, 100, 51, 100);
-    if (ppb <= 360) return mapAQI(ppb, 101, 360, 101, 150);
-    if (ppb <= 649) return mapAQI(ppb, 361, 649, 151, 200);
-    if (ppb <= 1249) return mapAQI(ppb, 650, 1249, 201, 300);
-    if (ppb <= 2049) return mapAQI(ppb, 1250, 2049, 301, 500);
-    return 500;
-  };
-
-  const calculateSO2AQI = (concentration) => {
-    const ppb = concentration * 0.38;
-    if (ppb <= 35) return mapAQI(ppb, 0, 35, 0, 50);
-    if (ppb <= 75) return mapAQI(ppb, 36, 75, 51, 100);
-    if (ppb <= 185) return mapAQI(ppb, 76, 185, 101, 150);
-    if (ppb <= 304) return mapAQI(ppb, 186, 304, 151, 200);
-    if (ppb <= 604) return mapAQI(ppb, 305, 604, 201, 300);
-    if (ppb <= 1004) return mapAQI(ppb, 605, 1004, 301, 500);
-    return 500;
-  };
-
-  const calculateCOAQI = (concentration) => {
-    const ppm = concentration * 0.000873;
-    if (ppm <= 4.4) return mapAQI(ppm, 0, 4.4, 0, 50);
-    if (ppm <= 9.4) return mapAQI(ppm, 4.5, 9.4, 51, 100);
-    if (ppm <= 12.4) return mapAQI(ppm, 9.5, 12.4, 101, 150);
-    if (ppm <= 15.4) return mapAQI(ppm, 12.4, 15.4, 151, 200);
-    if (ppm <= 30.4) return mapAQI(ppm, 15.5, 30.4, 201, 300);
-    if (ppm <= 50.4) return mapAQI(ppm, 30.5, 50.4, 301, 500);
-    return 500;
-  };
-
-  const getAQICategory = (aqi) => {
-    for (const category of aqiCategories) {
-      if (aqi >= category.range[0] && aqi <= category.range[1]) {
-        return category;
+  
+  // Toggle station markers
+  const toggleMarkers = () => {
+    setShowMarkers(!showMarkers);
+    if (markersLayer.current) {
+      if (!showMarkers) {
+        markersLayer.current.addTo(leafletMap.current);
+      } else {
+        leafletMap.current.removeLayer(markersLayer.current);
       }
     }
-    return aqiCategories[aqiCategories.length - 1];
   };
 
-  const fetchStationData = async (station) => {
-    try {
-      const API_KEY = 'aac405e628f9c30a047d3de13192a7f7';
-      const airResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${station.latitude}&lon=${station.longitude}&appid=${API_KEY}`
-      );
-      const weatherResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${station.latitude}&lon=${station.longitude}&appid=${API_KEY}&units=metric`
-      );
-      const pollutants = airResponse.data.list[0].components;
-      const { temp, humidity } = weatherResponse.data.main;
-      return {
-        pm2_5: pollutants.pm2_5,
-        pm10: pollutants.pm10,
-        no2:pollutants.no2,
-        o3: pollutants.o3,
-        co: pollutants.co,
-        so2: pollutants.so2,
-        // nh3: pollutants.nh3,
-        // no: pollutants.no,
-        temp,         // Temperature in °C
-        hum: humidity // Humidity percentage
-      };
-    } catch (error) {
-      console.error('Error fetching station data:', error);
-      return {};
+  // Initialize map
+  useEffect(() => {
+    if (mapRef.current && !leafletMap.current) {
+      // Create map instance
+      leafletMap.current = L.map(mapRef.current).setView(INDIA_CENTER, DEFAULT_ZOOM);
+      
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(leafletMap.current);
+      
+      // Create layers for markers and heat
+      markersLayer.current = L.layerGroup().addTo(leafletMap.current);
+      
+      // Add India outline
+      fetch('/india-states.geojson')
+        .then(response => response.json())
+        .then(data => {
+          L.geoJSON(data, {
+            style: {
+              color: isDark ? '#666' : '#999',
+              weight: 1,
+              fillOpacity: 0.1,
+              fillColor: isDark ? '#222' : '#f5f5f5'
+            }
+          }).addTo(leafletMap.current);
+        })
+        .catch(err => console.error("Error loading India GeoJSON:", err));
     }
-  };
+    
+    // Cleanup function
+    return () => {
+      if (leafletMap.current) {
+        leafletMap.current.remove();
+        leafletMap.current = null;
+      }
+    };
+  }, []);
+
+  // Update map theme when dark mode changes
+  useEffect(() => {
+    if (leafletMap.current) {
+      // This is just a workaround since we can't easily change tile layers
+      // In a real application, you would switch between light and dark map tiles
+      const container = leafletMap.current.getContainer();
+      if (isDark) {
+        container.style.filter = 'invert(0.8) brightness(0.8) contrast(1.2)';
+      } else {
+        container.style.filter = 'none';
+      }
+    }
+  }, [isDark]);
 
   // Load station data from CSV
   useEffect(() => {
@@ -262,42 +155,19 @@ function HomePage() {
         const response = await fetch('/metadata.csv');
         const csvData = await response.text();
 
-        console.log("CSV Data Preview:", csvData.substring(0, 200));
-
         Papa.parse(csvData, {
           header: true,
           complete: (results) => {
             const validStations = results.data.filter(
               station =>
-                station.station_id && station.latitude && station.longitude && station.name && station.country && station.city && station.state 
+                station.station_id && station.latitude && station.longitude && 
+                station.name && station.country && station.city && station.state 
             );
+            
             setStations(validStations);
-            setFilteredStations(validStations);
-
-            setStationsLoaded(true);
-
-            // Only set default station if none passed from another page
-            if (!initialSelectedStation && validStations.length > 0) {
-              setSelectedStation(validStations[0]);
-            } else if (initialSelectedStation) {
-              // Find the matching station in our loaded stations if possible
-              const matchedStation = validStations.find(
-                station => station.station_id === initialSelectedStation.station_id
-              );
-
-              // If we found a match, use the full station data
-              if (matchedStation) {
-                setSelectedStation(matchedStation);
-              }
-              // Otherwise keep using the passed station data
-            }
-
-
-            // if (validStations.length > 0) {
-            //   setSelectedStation(validStations[452]);
-            // }
-
-            setLoading(false);
+            
+            // Fetch AQI data once stations are loaded
+            fetchAllStationsData(validStations);
           },
           error: (error) => {
             console.error("CSV parsing error:", error);
@@ -315,345 +185,335 @@ function HomePage() {
     loadStations();
   }, []);
 
-  // Fetch data when a station is selected
-  useEffect(() => {
-    if (selectedStation) {
-      fetchCurrentData();
-      fetchHistoricalData();
+  // Fetch AQI data for all stations
+  const fetchAllStationsData = async (stationList) => {
+    if (!stationList || stationList.length === 0) return;
+    
+    const currentTime = new Date();
+    
+    // Check if cache is still valid (less than 1 hour old)
+    if (
+      dataCache.timestamp && 
+      dataCache.data.length > 0 && 
+      (currentTime - dataCache.timestamp) < 3600000
+    ) {
+      console.log("Using cached AQI data");
+      setStationsWithAqi(dataCache.data);
+      setLastUpdated(dataCache.timestamp);
+      setLoading(false);
+      updateMapLayers(dataCache.data);
+      return;
     }
-  }, [selectedStation]);
-
-  // Filter stations based on search term
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = stations.filter(station =>
-        (station.name && station.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (station.city && station.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (station.state && station.state.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-      setFilteredStations(filtered);
-    } else {
-      setFilteredStations(stations);
-    }
-  }, [searchTerm, stations]);
-
-  // Fetch current AQI data for selected station
-  const fetchCurrentData = async () => {
-    if (!selectedStation) return;
+    
     setLoading(true);
+    console.log("Fetching fresh AQI data");
+    
     try {
-      const API_KEY = 'aac405e628f9c30a047d3de13192a7f7';
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${selectedStation.latitude}&lon=${selectedStation.longitude}&appid=${API_KEY}`
-      );
-
-      const weatherResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${selectedStation.latitude}&lon=${selectedStation.longitude}&appid=${API_KEY}&units=metric`
-      );
-      const weatherdata = weatherResponse.data.main;
-      setWeatherData(weatherdata)
-
-      const pollutants = response.data.list[0].components;
-      const aqi = calculateAQI(pollutants);
-      setCurrentAQI(aqi);
-      setPollutantData(pollutants);
+      // Use Promise.all to fetch data for all stations in parallel
+      // In a real app, you might want to batch these requests
+      const batchSize = 10;
+      let allStationsData = [];
       
-      setLoading(false);
-    } catch (error) {
-      setError('Error fetching current data: ' + error.message);
-      setLoading(false);
-    }
-  };
-
-  // Fetch historical data for selected station
-  const fetchHistoricalData = async () => {
-    if (!selectedStation) return;
-    setLoading(true);
-    try {
-      const API_KEY = 'aac405e628f9c30a047d3de13192a7f7';
-      const now = Math.floor(Date.now() / 1000);
-      const oneDayAgo = now - (24 * 60 * 60);
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/air_pollution/history?lat=${selectedStation.latitude}&lon=${selectedStation.longitude}&start=${oneDayAgo}&end=${now}&appid=${API_KEY}`
-      );
-      const history = {
-        labels: [],
-        aqi: [],
-        pm2_5: [],
-        pm10: [],
-        o3: [],
-        no2: [],
-        so2: [],
-        co: [],
-        no: [],
-        nh3: []
-      };
-
-      response.data.list.forEach(item => {
-        const datetime = new Date(item.dt * 1000);
-        history.labels.push(datetime.toLocaleTimeString());
-        const currentAQI = calculateAQI(item.components);
-        history.aqi.push(currentAQI);
-        history.pm2_5.push(item.components.pm2_5);
-        history.pm10.push(item.components.pm10);
-        history.o3.push(item.components.o3);
-        history.no2.push(item.components.no2);
-        history.so2.push(item.components.so2);
-        history.co.push(item.components.co);
-        history.no.push(item.components.no);
-        history.nh3.push(item.components.nh3);
-      });
-
-      setHistoricalData(history);
-      setLoading(false);
-    } catch (error) {
-      setError('Error fetching historical data: ' + error.message);
-      setLoading(false);
-    }
-  };
-
-  const handleStationSelect = (station) => {
-    setSelectedStation(station);
-    setSearchTerm('');
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleRefresh = () => {
-    if (selectedStation) {
-      fetchCurrentData();
-      fetchHistoricalData();
-      setLastUpdated(new Date().toLocaleString());
-    }
-  };
-
-  const aqiCategory = currentAQI ? getAQICategory(currentAQI) : null;
-
-  // Chart data for historical display
-  const chartData = {
-    labels: historicalData.labels || [],
-    datasets: [
-      {
-        label: selectedPollutant === 'aqi' ? 'AQI' : selectedPollutant,
-        data: historicalData[selectedPollutant] || [],
-        fill: false,
-        borderColor: selectedPollutant === 'aqi' && aqiCategory ? aqiCategory.color : '#4bc0c0',
-        tension: 0.1
+      for (let i = 0; i < stationList.length; i += batchSize) {
+        const batch = stationList.slice(i, i + batchSize);
+        const batchPromises = batch.map(async (station) => {
+          try {
+            const airResponse = await axios.get(
+              `https://api.openweathermap.org/data/2.5/air_pollution?lat=${station.latitude}&lon=${station.longitude}&appid=${API_KEY}`
+            );
+            
+            const pollutants = airResponse.data.list[0].components;
+            
+            const aqi = calculateAQI(pollutants);
+            const aqiCategory = getAqiCategory(aqi);
+            const aqiColor = getAqiColor(aqi);
+            
+            return {
+              ...station,
+              aqi,
+              aqiCategory,
+              aqiColor,
+              pollutants: {
+                pm2_5: pollutants.pm2_5,
+                pm10: pollutants.pm10,
+                no2: pollutants.no2,
+                o3: pollutants.o3,
+                co: pollutants.co,
+                so2: pollutants.so2,
+              }
+            };
+          } catch (error) {
+            console.error(`Error fetching data for station ${station.name}:`, error);
+            
+            // Return station with placeholder data
+            return {
+              ...station,
+              aqi: null,
+              aqiCategory: 'Unknown',
+              aqiColor: '#999',
+              pollutants: {}
+            };
+          }
+        });
+        
+        const batchResults = await Promise.all(batchPromises);
+        allStationsData = [...allStationsData, ...batchResults];
+        
+        // Update progress
+        console.log(`Fetched ${allStationsData.length} of ${stationList.length} stations`);
       }
-    ]
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' },
-      title: {
-        display: true,
-        text: `Past 24 Hours ${selectedPollutant.toUpperCase()}`
-      },
-    },
-    scales: {
-      y: { beginAtZero: true }
+      
+      // Filter out stations with null AQI
+      const validStationsData = allStationsData.filter(station => station.aqi !== null);
+      
+      // Update state and cache
+      setStationsWithAqi(validStationsData);
+      setDataCache({
+        timestamp: currentTime,
+        data: validStationsData
+      });
+      setLastUpdated(currentTime);
+      setLoading(false);
+      
+      // Update map with fresh data
+      updateMapLayers(validStationsData);
+      
+    } catch (error) {
+      console.error("Error fetching AQI data:", error);
+      setError('Error fetching AQI data: ' + error.message);
+      setLoading(false);
     }
   };
-  // console.log(setSelectedStation)
-  // Inline Historical Data Display component
-  const HistoricalDataDisplay = ({
-    historicalData,
-    selectedPollutant,
-    setSelectedPollutant,
-    chartData,
-    chartOptions,
-    chartType,
-    setChartType
-  }) => {
-    return (
-      <div className="historical-data-container">
-        <div className="chart-controls-wrapper">
-          <div className="chart-type-dropdown">
-            <label htmlFor="chartTypeSelect" className="chart-type-label">Chart Type:</label>
-            <select
-              id="chartTypeSelect"
-              value={chartType}
-              onChange={(e) => setChartType(e.target.value)}
-              className="chart-select"
-            >
-              <option value="line">Line Chart</option>
-              <option value="histogram">Histogram</option>
-            </select>
-          </div>
+
+  // Set up data refresh interval
+  useEffect(() => {
+    // Refresh data every hour
+    const intervalId = setInterval(() => {
+      fetchAllStationsData(stations);
+    }, 3600000);
+    
+    return () => clearInterval(intervalId);
+  }, [stations]);
+
+  // Update map layers with the latest data
+  const updateMapLayers = (stationsData) => {
+    if (!leafletMap.current || !stationsData.length) return;
+    
+    // Clear existing layers
+    if (markersLayer.current) {
+      markersLayer.current.clearLayers();
+    }
+    
+    if (heatLayer.current) {
+      leafletMap.current.removeLayer(heatLayer.current);
+    }
+    
+    // Create heatmap data points
+    const heatData = stationsData
+      .filter(station => station.aqi !== null)
+      .map(station => {
+        const intensity = station.aqi / 500; // Normalize AQI (0-500 scale) to 0-1
+        return [
+          parseFloat(station.latitude), 
+          parseFloat(station.longitude), 
+          intensity
+        ];
+      });
+    
+    // Add extra interpolation points to make heatmap more continuous
+    // Create a grid of points covering India to improve interpolation
+    const extraPoints = [];
+    
+    // India bounds (approx)
+    const north = 35.5;
+    const south = 6.5;
+    const east = 97.5;
+    const west = 68.0;
+    
+    // Grid spacing (degrees)
+    const spacing = 0.75;
+    
+    // For each grid point, find nearest stations and interpolate values
+    for (let lat = south; lat <= north; lat += spacing) {
+      for (let lng = west; lng <= east; lng += spacing) {
+        // Skip if already has a station nearby (within 0.3 degrees)
+        const hasNearbyStation = stationsData.some(station => {
+          const stLat = parseFloat(station.latitude);
+          const stLng = parseFloat(station.longitude);
+          const distance = Math.sqrt(
+            Math.pow(stLat - lat, 2) + Math.pow(stLng - lng, 2)
+          );
+          return distance < 0.3;
+        });
+        
+        if (!hasNearbyStation) {
+          // Find 3 nearest stations
+          const nearest = stationsData
+            .filter(station => station.aqi !== null)
+            .map(station => ({
+              station,
+              distance: Math.sqrt(
+                Math.pow(parseFloat(station.latitude) - lat, 2) + 
+                Math.pow(parseFloat(station.longitude) - lng, 2)
+              )
+            }))
+            .sort((a, b) => a.distance - b.distance)
+            .slice(0, 3);
+          
+          // Skip if no stations nearby
+          if (nearest.length === 0) continue;
+          
+          // Inverse distance weighted interpolation
+          let weightedSum = 0;
+          let weightSum = 0;
+          
+          nearest.forEach(({ station, distance }) => {
+            // Add a small epsilon to avoid division by zero
+            const weight = 1 / (distance + 0.0001);
+            weightedSum += station.aqi * weight;
+            weightSum += weight;
+          });
+          
+          const interpolatedAqi = weightSum > 0 ? weightedSum / weightSum : 0;
+          const intensity = interpolatedAqi / 500;
+          
+          // Add to extra points
+          extraPoints.push([lat, lng, intensity * 0.8]); // Slightly lower intensity for interpolated points
+        }
+      }
+    }
+    
+    // Combine actual station data with interpolated points
+    const combinedHeatData = [...heatData, ...extraPoints];
+    
+    // Add heatmap layer
+    heatLayer.current = L.heatLayer(combinedHeatData, {
+      radius: 35,
+      blur: 25,
+      maxZoom: 10,
+      minOpacity: 0.4,
+      gradient: {
+        0.0: '#00e400',  // Good - Green
+        0.2: '#ffff00',  // Moderate - Yellow
+        0.4: '#ff7e00',  // Unhealthy for Sensitive - Orange
+        0.6: '#ff0000',  // Unhealthy - Red
+        0.8: '#99004c',  // Very Unhealthy - Purple
+        1.0: '#7e0023'   // Hazardous - Maroon
+      }
+    }).addTo(leafletMap.current);
+    
+    // Create a custom map pin icon
+    const createMarkerIcon = (color) => {
+      return L.divIcon({
+        className: 'custom-map-pin',
+        html: `<div class="pin-container">
+                <div class="pin" style="background-color: ${color};">
+                  <div class="pin-inner"></div>
+                </div>
+                <div class="pin-shadow"></div>
+              </div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+        popupAnchor: [0, -45]
+      });
+    };
+    
+    // Add markers for stations
+    stationsData.forEach(station => {
+      const markerIcon = createMarkerIcon(station.aqi ? station.aqiColor : '#999');
+      
+      const marker = L.marker(
+        [parseFloat(station.latitude), parseFloat(station.longitude)],
+        { icon: markerIcon }
+      );
+      
+      // Add popup with station info
+      const popupContent = `
+        <div class="station-popup">
+          <h3>${station.name}</h3>
+          <p><strong>City:</strong> ${station.city}, ${station.state}</p>
+          ${station.aqi ? `
+            <p><strong>AQI:</strong> ${station.aqi} (${station.aqiCategory})</p>
+            <p><strong>PM2.5:</strong> ${station.pollutants.pm2_5?.toFixed(1) || 'N/A'} μg/m³</p>
+            <p><strong>PM10:</strong> ${station.pollutants.pm10?.toFixed(1) || 'N/A'} μg/m³</p>
+            <p><strong>NO₂:</strong> ${station.pollutants.no2?.toFixed(1) || 'N/A'} μg/m³</p>
+            <p><strong>O₃:</strong> ${station.pollutants.o3?.toFixed(1) || 'N/A'} μg/m³</p>
+            <p><strong>CO:</strong> ${station.pollutants.co?.toFixed(1) || 'N/A'} mg/m³</p>
+            <p><strong>SO₂:</strong> ${station.pollutants.so2?.toFixed(1) || 'N/A'} μg/m³</p>
+          ` : `<p>No AQI data available</p>`}
         </div>
-        {chartType === 'line' ? (
-          <HistoricalChart
-            historicalData={historicalData}
-            selectedPollutant={selectedPollutant}
-            setSelectedPollutant={setSelectedPollutant}
-            chartData={chartData}
-            chartOptions={chartOptions}
-          />
-        ) : (
-          <HistoricalHistogram
-            historicalData={{
-              labels: historicalData.labels || [],
-              [selectedPollutant]: historicalData[selectedPollutant] || []
-            }}
-            selectedPollutant={selectedPollutant}
-            setSelectedPollutant={setSelectedPollutant}
-          />
-        )}
-        <style jsx>{`
-          .historical-data-container {
-            background-color: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            margin-bottom: 24px;
-          }
-          .chart-controls-wrapper {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 16px;
-          }
-          .chart-type-dropdown {
-            display: flex;
-            align-items: center;
-          }
-          .chart-type-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #4A5568;
-            margin-right: 8px;
-          }
-          .chart-select {
-            background-color: #F7FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 35px;
-            padding: 13px 14px;
-            font-size: 14px;
-            color: #2D3748;
-            cursor: pointer;
-            min-width: 140px;
-            transition: all 0.2s ease;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234A5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 32px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-          }
-          .chart-select:hover {
-            border-color: #CBD5E0;
-            background-color: #EDF2F7;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-          }
-          .chart-select:focus {
-            outline: none;
-            border-radius: 25px;
-            border-color: #4299E1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
-          }
-          @media (max-width: 640px) {
-            .chart-type-dropdown {
-              width: 100%;
-            }
-            .chart-select {
-              width: 100%;
-            }
-          }
-        `}</style>
-      </div>
-    );
+      `;
+      
+      marker.bindPopup(popupContent);
+      markersLayer.current.addLayer(marker);
+    });
+    
+    // Show/hide markers based on current state
+    if (!showMarkers) {
+      leafletMap.current.removeLayer(markersLayer.current);
+    }
   };
-
-  if (loading && !selectedStation) {
-    return <div className="loading">Loading station data...</div>;
-  }
-
-  if (error && !selectedStation) {
-    return <div className="error">{error}</div>;
-  }
 
   return (
-    <div className="app">
-      {/* <div>
-        <button onClick={toggleDarkMode} className="dark-mode-button">
-          {isDark ? 'Dark Mode' : 'Light Mode'}
-        </button>
-      </div> */}
-
+    <div className={`app ${isDark ? 'dark-mode' : ''}`}>
       <TopBar toggleDarkMode={toggleDarkMode} isDark={isDark} />
-
-
-      <Header
-        searchTerm={searchTerm}
-        filteredStations={filteredStations}
-        handleSearchChange={handleSearchChange}
-        handleStationSelect={handleStationSelect}
-        handleRefresh={handleRefresh}
-        lastUpdated={lastUpdated}
-        isdark={isDark}
-      />
-      {selectedStation && (
-        <div className="dashboard">
-          <StationInfo selectedStation={selectedStation} isdark={isDark} pollutantData={pollutantData} historicalData={historicalData}/>
-
-          <div style={{ display: 'flex', width: '100%' }}>
-            <div style={{ flex: '0 0 70%' }}>
-              <AQIDisplay currentAQI={currentAQI} aqiCategory={aqiCategory} weatherData={weatherData} />
-            </div>
-            <div style={{ flex: '0 0 30%', marginLeft: '10px', paddingRight: '10px' }}>
-              <MapView selectedStation={selectedStation} currentAQI={currentAQI} />
-            </div>
-          </div>
-
-          <div style={{ marginTop: '20px' }}>
-            <PollutantCards pollutantData={pollutantData} isdark={isDark} selectedStation={selectedStation} historicalData={historicalData}/>
-          </div>
-
-          <div style={{ marginTop: '20px' }}>
-            <HistoricalDataDisplay
-              historicalData={historicalData}
-              selectedPollutant={selectedPollutant}
-              setSelectedPollutant={setSelectedPollutant}
-              chartData={chartData}
-              chartOptions={chartOptions}
-              chartType={chartType}
-              setChartType={setChartType}
-            />
-          </div>
-
-          <div style={{ marginTop: '-30px' }}>
-            {selectedStation && (
-              <CityStationsTable
-                selectedStation={selectedStation}
-                stations={stations}
-                calculateAQI={calculateAQI}
-                getAQICategory={getAQICategory}
-                fetchStationData={fetchStationData}
-              />
-            )}
-          </div>
-
-          {pollutantData.pm2_5 && (
-            <CigaretteEquivalentCard pm25Level={pollutantData.pm2_5} />
+      
+      <div className="content">
+        <div className="header">
+          <h1>India Air Quality Index Heatmap</h1>
+          <p>Real-time AQI visualization from 662 monitoring stations across India</p>
+          
+          {lastUpdated && (
+            <p className="last-updated">
+              Last updated: {lastUpdated.toLocaleTimeString()} ({lastUpdated.toLocaleDateString()})
+            </p>
           )}
-
-          <div style={{ marginTop: '20px' }}>
-            <HealthRisksComponent currentAQI={currentAQI} />
+        </div>
+        
+        <div className="map-container">
+          {loading && <div className="loading-overlay"><div className="loader"></div></div>}
+          
+          <div className="map-controls">
+            <button className="control-button" onClick={toggleMarkers}>
+              {showMarkers ? 'Hide Stations' : 'Show Stations'}
+            </button>
+            <button className="control-button" onClick={() => fetchAllStationsData(stations)}>
+              Refresh Data
+            </button>
+          </div>
+          
+          <div className="map" id="map" ref={mapRef}></div>
+          
+          <div className="map-legend">
+            <h3>AQI Legend</h3>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#00e400'}}></span>
+              <span>Good (0-50)</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#ffff00'}}></span>
+              <span>Moderate (51-100)</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#ff7e00'}}></span>
+              <span>Unhealthy for Sensitive Groups (101-150)</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#ff0000'}}></span>
+              <span>Unhealthy (151-200)</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#99004c'}}></span>
+              <span>Very Unhealthy (201-300)</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color" style={{backgroundColor: '#7e0023'}}></span>
+              <span>Hazardous (301+)</span>
+            </div>
           </div>
         </div>
-      )}
-
-      {!selectedStation && (
-        <div className="no-station">
-          <p>Please select a station to view AQI data.</p>
-        </div>
-      )}
-
+      </div>
+      
       <Footer />
     </div>
   );

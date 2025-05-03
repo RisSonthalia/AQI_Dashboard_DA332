@@ -9,26 +9,33 @@ const Component1 = ({ pm25Value }) => {
   // Calculate how many times above WHO guideline (with 1 decimal place)
   const timesAboveWHO = (actualPm25Value / whoGuideline).toFixed(1);
 
-  // Determine health risk level based on PM2.5 value
+  // getHealthRiskLevel
   const getHealthRiskLevel = (value) => {
     if (value <= 50) return { level: "Good", color: "#4CAF50" };
     if (value <= 100) return { level: "Moderate", color: "#FFC107" };
-    if (value <= 250) return { level: "Poor", color: "#FF9800" };
-    if (value <= 350) return { level: "Unhealthy", color: "#F44336" };
-    if (value <= 430) return { level: "Severe", color: "#9C27B0" };
+    if (value <= 168) return { level: "Poor", color: "#FF9800" };
+    if (value <= 208) return { level: "Unhealthy", color: "#F44336" };
+    if (value <= 748) return { level: "Severe", color: "#9C27B0" };
     return { level: "Hazardous", color: "#7D0000" };
   };
 
   const risk = getHealthRiskLevel(actualPm25Value);
 
-  // Dynamic status message based on PM2.5 value
+  // getStatusMessage
   const getStatusMessage = (value) => {
-    if (value <= 50) return "making it acceptable, but sensitive individuals should be cautious.";
-    if (value <= 100) return "which means sensitive groups should reduce outdoor activities.";
-    if (value <= 150.4) return "which is unhealthy, so everyone should take precautions.";
-    if (value <= 350.4) return "which is very unhealthy, avoid outdoor activities.";
-    return "which is hazardous, stay indoors if possible.";
+    if (value <= 50)
+      return "which is within safe O₃ limits, but sensitive individuals should be cautious.";
+    if (value <= 100)
+      return "indicating moderate O₃ levels; sensitive groups should reduce outdoor activities.";
+    if (value <= 168)
+      return "indicating poor O₃ levels; everyone should take precautions.";
+    if (value <= 208)
+      return "indicating unhealthy O₃ levels; avoid outdoor activities.";
+    if (value <= 748)
+      return "indicating very unhealthy O₃ levels; everyone should avoid outdoor exposure.";
+    return "indicating hazardous O₃ levels; stay indoors if possible.";
   };
+
 
   const statusMessage = getStatusMessage(actualPm25Value);
 
@@ -66,7 +73,7 @@ const Component1 = ({ pm25Value }) => {
             </div>
             <div className="who-info">
               <p>
-                The current PM2.5 level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
+                The current O3 level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
                 <span className="who-value">{whoGuideline} µg/m³</span>.
               </p>
             </div>

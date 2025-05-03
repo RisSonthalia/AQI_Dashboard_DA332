@@ -20,27 +20,27 @@ const Component5 = () => {
     {
       title: "Respiratory Issues",
       description: "Exposure to ammonia can cause irritation and damage to the respiratory system.",
-      imageSrc: "/nh3/c1.webp" // Replace with your actual image paths
+      imageSrc: "/nh3/c5i1.webp" // Replace with your actual image paths
     },
     {
       title: "Eye Irritation",
       description: "Ammonia vapors can irritate the eyes, leading to redness and discomfort.",
-      imageSrc: "/nh3/c2.webp"
+      imageSrc: "/nh3/c5i2.webp"
     },
     {
       title: "Environmental Damage",
       description: "Ammonia contributes to nutrient pollution, which can harm aquatic life and ecosystems.",
-      imageSrc: "/nh3/c3.webp"
+      imageSrc: "/nh3/c5i3.webp"
     },
     {
       title: "Soil Acidification",
       description: "When deposited, ammonia can change soil pH, impacting plant growth and soil health.",
-      imageSrc: "/nh3/c4.webp"
+      imageSrc: "/nh3/c5i4.webp"
     },
     {
       title: "Increased Smog Formation",
       description: "Ammonia plays a role in secondary particulate matter formation, contributing to smog.",
-      imageSrc: "/nh3/c5.webp"
+      imageSrc: "/nh3/c5i5.webp"
     }
   ];
 

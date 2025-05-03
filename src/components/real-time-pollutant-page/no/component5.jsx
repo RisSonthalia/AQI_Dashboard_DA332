@@ -21,27 +21,27 @@ const Component5 = () => {
     {
       title: "Respiratory Irritation",
       description: "Exposure to nitrogen oxides can cause inflammation and irritation in the respiratory tract.",
-      imageSrc: "/no/c1.webp" // Replace with your actual image paths
+      imageSrc: "/no/c5i1.webp" // Replace with your actual image paths
     },
     {
       title: "Aggravated Asthma",
       description: "NO can exacerbate asthma symptoms and trigger asthma attacks in sensitive individuals.",
-      imageSrc: "/no/c2.webp"
+      imageSrc: "/no/c5i2.webp"
     },
     {
       title: "Reduced Lung Function",
       description: "Long-term exposure may lead to decreased lung capacity and impaired breathing.",
-      imageSrc: "/no/c3.webp"
+      imageSrc: "/no/c5i3.webp"
     },
     {
       title: "Increased Respiratory Infections",
       description: "Higher levels of nitrogen oxides are associated with a greater risk of respiratory infections.",
-      imageSrc: "/no/c4.webp"
+      imageSrc: "/no/c5i4.webp"
     },
     {
       title: "Environmental Impact",
       description: "Nitrogen oxides contribute to smog and acid rain, affecting ecosystems and vegetation.",
-      imageSrc: "/no/c5.webp"
+      imageSrc: "/no/c5i5.webp"
     }
   ];
 

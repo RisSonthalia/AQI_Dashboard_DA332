@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import LiveAQIIndicator from './LiveAQIIndicator';
+
 const Dialer = ({ currentAQI, aqiCategory }) => {
     const [animatedAQI, setAnimatedAQI] = useState(0);
-    // Function to generate background gradient based on AQI value
-    const getBackgroundGradient = (pm25) => {
-        if (pm25 === null) return 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'; // Default gradient
 
-        // PM2.5 thresholds (in μg/m³) based on standard guidelines
-        if (pm25 <= 12) {
+    // Function to generate background gradient based on NO2 value
+    const getBackgroundGradient = (no2) => {
+        if (no2 === null) 
+            return 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'; // Default gradient
+
+        if (no2 <= 50) {
             // Good - Green gradient
             return 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
-        } else if (pm25 <= 35.4) {
+        } else if (no2 <= 100) {
             // Moderate - Yellow gradient
             return 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)';
-        } else if (pm25 <= 55.4) {
+        } else if (no2 <= 150) {
             // Poor - Orange gradient
             return 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
-        } else if (pm25 <= 150.4) {
+        } else if (no2 <= 200) {
             // Unhealthy - Red gradient
             return 'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)';
-        } else if (pm25 <= 250.4) {
+        } else if (no2 <= 300) {
             // Severe - Purple gradient
             return 'linear-gradient(135deg, #6a11cb 0%, #fc2d7f 100%)';
         } else {
@@ -28,7 +30,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
         }
     };
 
-    // Animate AQI value on component mount or when currentAQI changes
+    // Animate NO2 value on component mount or when currentAQI changes
     useEffect(() => {
         if (currentAQI === null) {
             setAnimatedAQI(0);
@@ -60,6 +62,10 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
         requestAnimationFrame(animateValue);
     }, [currentAQI]);
 
+    // Set the gauge maximum value to 500 for full gradient bar length
+    const gaugeMax = 500;
+    const normalizedValue = Math.min(animatedAQI / gaugeMax, 1);
+
     return (
         <div
             className="aqi-display"
@@ -74,21 +80,23 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                 animation: 'gradientShift 10s ease infinite',
             }}
         >
-            {/* Live AQI indicator */}
+            {/* Live NO2 indicator */}
             <LiveAQIIndicator />
 
-
             {/* Animated background bubbles */}
-            <div className="animated-background" style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                overflow: 'hidden',
-                zIndex: 0,
-                opacity: 0.4
-            }}>
+            <div
+                className="animated-background"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    overflow: 'hidden',
+                    zIndex: 0,
+                    opacity: 0.4,
+                }}
+            >
                 {[...Array(6)].map((_, i) => (
                     <div
                         key={i}
@@ -113,8 +121,8 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                     className="aqi-gauge"
                     style={{
                         background: `conic-gradient(
-                            ${aqiCategory?.color || '#e0e0e0'} ${(animatedAQI / 500) * 360}deg, 
-                            #e0e0e0 ${(animatedAQI / 500) * 360}deg 360deg
+                            ${aqiCategory?.color || '#e0e0e0'} ${normalizedValue * 360}deg, 
+                            #e0e0e0 ${normalizedValue * 360}deg 360deg
                         )`,
                         boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
                         margin: '0 auto 20px',
@@ -140,7 +148,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                             bottom: '50%',
                             left: '50%',
                             transformOrigin: 'bottom center',
-                            transform: `translateX(-50%) rotate(${(animatedAQI / 500) * 360}deg)`,
+                            transform: `translateX(-50%) rotate(${normalizedValue * 360}deg)`,
                             zIndex: 2,
                             transition: 'transform 0.3s ease'
                         }}
@@ -183,6 +191,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         <div
                             className="aqi-label"
                             style={{
+                                color :'black',
                                 fontSize: '1rem',
                                 fontWeight: 'normal',
                                 marginTop: '5px'
@@ -205,7 +214,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         <>
                             <h3
                                 style={{
-                                    color: currentAQI > 200 ? '#fff' : aqiCategory.color,
+                                    color: currentAQI > 150 ? '#fff' : aqiCategory.color,
                                     fontSize: '1.5rem',
                                     margin: '0 0 10px',
                                     animation: 'fadeIn 1s ease-in'
@@ -235,7 +244,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                 }}
             >
                 <div className="aqi-background" style={{ position: 'relative' }}>
-                    {/* Category Labels (Centered per range) */}
+                    {/* Category Labels */}
                     <div
                         className="category-labels"
                         style={{
@@ -247,19 +256,20 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                     >
                         {[
                             { label: 'Good', start: 0, end: 50 },
-                            { label: 'Moderate', start: 50, end: 100 },
-                            { label: 'Poor', start: 100, end: 250 },
-                            { label: 'Unhealthy', start: 250, end: 350 },
-                            { label: 'Severe', start: 350, end: 430 },
-                            { label: 'Hazardous', start: 430, end: 510 }
+                            { label: 'Moderate', start: 51, end: 100 },
+                            { label: 'Poor', start: 101, end: 150 },
+                            { label: 'Unhealthy', start: 151, end: 200 },
+                            { label: 'Severe', start: 201, end: 300 },
+                            { label: 'Hazardous', start: 300, end: 500 }
                         ].map(({ label, start, end }, index) => {
+                            // Calculate marker position using the mid-point
                             const mid = (start + end) / 2;
                             return (
                                 <div
                                     key={index}
                                     style={{
                                         position: 'absolute',
-                                        left: `${(mid / 510) * 100}%`,
+                                        left: `${(mid / gaugeMax) * 100}%`,
                                         transform: 'translateX(-50%)',
                                         whiteSpace: 'nowrap',
                                         color: '#fff'
@@ -271,7 +281,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         })}
                     </div>
 
-                    {/* Gradient bar */}
+                    {/* Gradient Bar */}
                     <div
                         className="gradient-bar"
                         style={{
@@ -292,7 +302,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                                 background: '#fff',
                                 borderRadius: '6px',
                                 top: '-2px',
-                                left: `${Math.min((animatedAQI / 510) * 100, 100)}%`,
+                                left: `${Math.min((animatedAQI / gaugeMax) * 100, 100)}%`,
                                 transform: 'translateX(-50%)',
                                 boxShadow: '0 0 5px rgba(0, 0, 0, 0.5)',
                                 transition: 'left 1.5s ease'
@@ -300,7 +310,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         ></div>
                     </div>
 
-                    {/* Value markers */}
+                    {/* Value Markers */}
                     <div
                         className="value-markers"
                         style={{
@@ -309,12 +319,12 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                             fontSize: '0.75rem'
                         }}
                     >
-                        {[0, 50, 100, 250, 350, 430, 510].map((val, index) => (
+                        {[0, 50, 100, 150, 200, 300, 500].map((val, index) => (
                             <div
                                 key={index}
                                 style={{
                                     position: 'absolute',
-                                    left: `${(val / 510) * 100}%`,
+                                    left: `${(val / gaugeMax) * 100}%`,
                                     transform: 'translateX(-50%)',
                                     whiteSpace: 'nowrap',
                                     color: '#fff'
@@ -325,9 +335,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         ))}
                     </div>
                 </div>
-
             </div>
-
 
             {/* CSS Animations and Styles */}
             <style jsx>{`

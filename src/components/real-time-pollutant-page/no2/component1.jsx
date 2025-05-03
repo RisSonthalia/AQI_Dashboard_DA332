@@ -9,26 +9,33 @@ const Component1 = ({ pm25Value }) => {
   // Calculate how many times above WHO guideline (with 1 decimal place)
   const timesAboveWHO = (actualPm25Value / whoGuideline).toFixed(1);
 
-  // Determine health risk level based on PM2.5 value
+  // getHealthRiskLevel
   const getHealthRiskLevel = (value) => {
-    if (value <= 50) return { level: "Good", color: "#4CAF50" };
-    if (value <= 100) return { level: "Moderate", color: "#FFC107" };
-    if (value <= 250) return { level: "Poor", color: "#FF9800" };
-    if (value <= 350) return { level: "Unhealthy", color: "#F44336" };
-    if (value <= 430) return { level: "Severe", color: "#9C27B0" };
+    if (value <= 40) return { level: "Good", color: "#4CAF50" };
+    if (value <= 80) return { level: "Moderate", color: "#FFC107" };
+    if (value <= 180) return { level: "Poor", color: "#FF9800" };
+    if (value <= 190) return { level: "Unhealthy", color: "#F44336" };
+    if (value <= 400) return { level: "Severe", color: "#9C27B0" };
     return { level: "Hazardous", color: "#7D0000" };
   };
 
   const risk = getHealthRiskLevel(actualPm25Value);
 
-  // Dynamic status message based on PM2.5 value
+  // getStatusMessage
   const getStatusMessage = (value) => {
-    if (value <= 50) return "making it acceptable, but sensitive individuals should be cautious.";
-    if (value <= 100) return "which means sensitive groups should reduce outdoor activities.";
-    if (value <= 150.4) return "which is unhealthy, so everyone should take precautions.";
-    if (value <= 350.4) return "which is very unhealthy, avoid outdoor activities.";
-    return "which is hazardous, stay indoors if possible.";
+    if (value <= 40)
+      return "which is within safe NO₂ limits, but sensitive individuals should be cautious.";
+    if (value <= 80)
+      return "indicating moderate NO₂ levels; sensitive groups should reduce outdoor activities.";
+    if (value <= 180)
+      return "indicating poor NO₂ levels; everyone should take precautions.";
+    if (value <= 190)
+      return "indicating unhealthy NO₂ levels; avoid outdoor activities.";
+    if (value <= 400)
+      return "indicating very unhealthy NO₂ levels; everyone should avoid outdoor exposure.";
+    return "indicating hazardous NO₂ levels; stay indoors if possible.";
   };
+
 
   const statusMessage = getStatusMessage(actualPm25Value);
 
@@ -36,7 +43,7 @@ const Component1 = ({ pm25Value }) => {
     <div className="pm25-containers">
       {/* Header section */}
       <h1 className="pm25-title">What is the Current NO2 Level?</h1>
-      
+
 
       <div className="content-container">
         {/* Left side with image */}
@@ -60,13 +67,13 @@ const Component1 = ({ pm25Value }) => {
           {/* Red box with WHO comparison */}
           <div className="who-comparison">
             <div className="who-badge" style={{
-    backgroundColor: timesAboveWHO > 1 ? '#dc2626' : '#4CAF50', // red if >1, green otherwise
-  }}>
+              backgroundColor: timesAboveWHO > 1 ? '#dc2626' : '#4CAF50', // red if >1, green otherwise
+            }}>
               <span className="times-above">{timesAboveWHO}x<br />Above</span>
             </div>
             <div className="who-info">
               <p>
-                The current PM2.5 level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
+                The current NO2 level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
                 <span className="who-value">{whoGuideline} µg/m³</span>.
               </p>
             </div>

@@ -66,7 +66,7 @@ const Component1 = ({ pm25Value }) => {
             </div>
             <div className="who-info">
               <p>
-                The current PM2.5 level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
+                The current NH3 level here is {timesAboveWHO}x Above the recommended WHO guideline of{' '}
                 <span className="who-value">{whoGuideline} µg/m³</span>.
               </p>
             </div>

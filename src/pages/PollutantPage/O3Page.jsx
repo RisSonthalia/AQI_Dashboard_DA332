@@ -89,25 +89,25 @@ function O3Page() {
       healthImplications: 'Air quality is acceptable. However, there may be a moderate health concern for a very small number of individuals who are unusually sensitive to air pollution.'
     },
     {
-      range: [100, 250],
+      range: [100, 162],
       level: 'Poor',
       color: 'linear-gradient(to right, #f6d365, #fa709a)',
       healthImplications: 'Air quality is poor. Prolonged exposure may cause discomfort or mild health issues for the general population.'
     },
     {
-      range: [250, 350],
+      range: [162, 208],
       level: 'Unhealthy',
       color: 'linear-gradient(to right, #fa709a, #ff0844)',
       healthImplications: 'Everyone may begin to experience health effects. Members of sensitive groups may experience more serious effects.'
     },
     {
-      range: [350, 430],
+      range: [208, 748],
       level: 'Severe',
       color: 'linear-gradient(to right, #ff0844, #6a11cb)',
       healthImplications: 'Health warnings of emergency conditions. The entire population is more likely to be affected.'
     },
     {
-      range: [430, 510],
+      range: [748, 1250],
       level: 'Hazardous',
       color: 'linear-gradient(to right, #6a11cb, #7f0000)',
       healthImplications: 'Serious health effects for everyone. Avoid outdoor exposure and physical activity.'

@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import LiveAQIIndicator from './LiveAQIIndicator';
+
 const Dialer = ({ currentAQI, aqiCategory }) => {
     const [animatedAQI, setAnimatedAQI] = useState(0);
-    // Function to generate background gradient based on AQI value
-    const getBackgroundGradient = (pm25) => {
-        if (pm25 === null) return 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'; // Default gradient
 
-        // PM2.5 thresholds (in μg/m³) based on standard guidelines
-        if (pm25 <= 12) {
+    // Function to generate background gradient based on O₃ value
+    const getBackgroundGradient = (o3Value) => {
+        if (o3Value === null) return 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'; // Default gradient
+
+        if (o3Value <= 50) {
             // Good - Green gradient
             return 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
-        } else if (pm25 <= 35.4) {
+        } else if (o3Value <= 100) {
             // Moderate - Yellow gradient
             return 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)';
-        } else if (pm25 <= 55.4) {
+        } else if (o3Value <= 168) {
             // Poor - Orange gradient
             return 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
-        } else if (pm25 <= 150.4) {
+        } else if (o3Value <= 208) {
             // Unhealthy - Red gradient
             return 'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)';
-        } else if (pm25 <= 250.4) {
+        } else if (o3Value <= 748) {
             // Severe - Purple gradient
             return 'linear-gradient(135deg, #6a11cb 0%, #fc2d7f 100%)';
         } else {
@@ -68,7 +69,8 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                 borderRadius: '12px',
                 padding: '20px',
                 boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-                color: currentAQI > 150 ? '#fff' : '#333',
+                // If currentAQI is high, use light text for contrast
+                color: currentAQI > 208 ? '#fff' : '#333',
                 position: 'relative',
                 overflow: 'hidden',
                 animation: 'gradientShift 10s ease infinite',
@@ -76,7 +78,6 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
         >
             {/* Live AQI indicator */}
             <LiveAQIIndicator />
-
 
             {/* Animated background bubbles */}
             <div className="animated-background" style={{
@@ -113,8 +114,8 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                     className="aqi-gauge"
                     style={{
                         background: `conic-gradient(
-                            ${aqiCategory?.color || '#e0e0e0'} ${(animatedAQI / 500) * 360}deg, 
-                            #e0e0e0 ${(animatedAQI / 500) * 360}deg 360deg
+                            ${aqiCategory?.color || '#e0e0e0'} ${(animatedAQI / 1250) * 360}deg, 
+                            #e0e0e0 ${(animatedAQI / 1250) * 360}deg 360deg
                         )`,
                         boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
                         margin: '0 auto 20px',
@@ -140,7 +141,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                             bottom: '50%',
                             left: '50%',
                             transformOrigin: 'bottom center',
-                            transform: `translateX(-50%) rotate(${(animatedAQI / 500) * 360}deg)`,
+                            transform: `translateX(-50%) rotate(${(animatedAQI / 1250) * 360}deg)`,
                             zIndex: 2,
                             transition: 'transform 0.3s ease'
                         }}
@@ -183,12 +184,13 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         <div
                             className="aqi-label"
                             style={{
+                                color :'black',
                                 fontSize: '1rem',
                                 fontWeight: 'normal',
                                 marginTop: '5px'
                             }}
                         >
-                            O3
+                            O₃
                         </div>
                     </div>
                 </div>
@@ -205,7 +207,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         <>
                             <h3
                                 style={{
-                                    color: currentAQI > 200 ? '#fff' : aqiCategory.color,
+                                    color: currentAQI > 208 ? '#fff' : aqiCategory.color,
                                     fontSize: '1.5rem',
                                     margin: '0 0 10px',
                                     animation: 'fadeIn 1s ease-in'
@@ -224,6 +226,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                     )}
                 </div>
             </div>
+
             <div
                 className="aqi-container"
                 style={{
@@ -248,10 +251,10 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         {[
                             { label: 'Good', start: 0, end: 50 },
                             { label: 'Moderate', start: 50, end: 100 },
-                            { label: 'Poor', start: 100, end: 250 },
-                            { label: 'Unhealthy', start: 250, end: 350 },
-                            { label: 'Severe', start: 350, end: 430 },
-                            { label: 'Hazardous', start: 430, end: 510 }
+                            { label: 'Poor', start: 100, end: 168 },
+                            { label: 'Unhealthy', start: 168, end: 208 },
+                            { label: 'Severe', start: 208, end: 748 },
+                            { label: 'Hazardous', start: 748, end: 1250 }
                         ].map(({ label, start, end }, index) => {
                             const mid = (start + end) / 2;
                             return (
@@ -259,7 +262,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                                     key={index}
                                     style={{
                                         position: 'absolute',
-                                        left: `${(mid / 510) * 100}%`,
+                                        left: `${(mid / 1250) * 100}%`,
                                         transform: 'translateX(-50%)',
                                         whiteSpace: 'nowrap',
                                         color: '#fff'
@@ -292,7 +295,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                                 background: '#fff',
                                 borderRadius: '6px',
                                 top: '-2px',
-                                left: `${Math.min((animatedAQI / 510) * 100, 100)}%`,
+                                left: `${Math.min((animatedAQI / 1250) * 100, 100)}%`,
                                 transform: 'translateX(-50%)',
                                 boxShadow: '0 0 5px rgba(0, 0, 0, 0.5)',
                                 transition: 'left 1.5s ease'
@@ -309,12 +312,12 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                             fontSize: '0.75rem'
                         }}
                     >
-                        {[0, 50, 100, 250, 350, 430, 510].map((val, index) => (
+                        {[0, 50, 100, 168, 208, 748, 1250].map((val, index) => (
                             <div
                                 key={index}
                                 style={{
                                     position: 'absolute',
-                                    left: `${(val / 510) * 100}%`,
+                                    left: `${(val / 1250) * 100}%`,
                                     transform: 'translateX(-50%)',
                                     whiteSpace: 'nowrap',
                                     color: '#fff'
@@ -325,9 +328,7 @@ const Dialer = ({ currentAQI, aqiCategory }) => {
                         ))}
                     </div>
                 </div>
-
             </div>
-
 
             {/* CSS Animations and Styles */}
             <style jsx>{`

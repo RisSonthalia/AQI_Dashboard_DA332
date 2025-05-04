@@ -13,7 +13,13 @@ const Header = ({ searchTerm, filteredStations, handleSearchChange, handleStatio
   }, [searchTerm]);
 
   const navigateToHome = () => {
-    navigate('/',{
+    navigate('/', {
+      state: { isdark: isDark }
+    });
+  };
+
+  const navigateToAQIMap = () => {
+    navigate('/aqi-map', {
       state: { isdark: isDark }
     });
   };
@@ -36,7 +42,7 @@ const Header = ({ searchTerm, filteredStations, handleSearchChange, handleStatio
     // If we have filtered stations and the user presses enter, select the first one
     if (filteredStations && filteredStations.length > 0) {
       const firstStation = filteredStations[0];
-      navigate('/realtime', { state: { selectedStation: firstStation, isdark:isDark } });
+      navigate('/', { state: { selectedStation: firstStation, isdark: isDark } });
     }
   };
 
@@ -47,7 +53,7 @@ const Header = ({ searchTerm, filteredStations, handleSearchChange, handleStatio
     }
 
     // Then navigate to home with the selected station
-    navigate('/realtime', { state: { selectedStation: station, isdark:isDark } });
+    navigate('/', { state: { selectedStation: station, isdark: isDark } });
   };
 
   const handleLocalSearchChange = (e) => {
@@ -74,6 +80,14 @@ const Header = ({ searchTerm, filteredStations, handleSearchChange, handleStatio
             </button>
 
             <div className="navsigation-buttons">
+              <div className="navs-button" onClick={navigateToAQIMap} title="AQI Map">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"></path>
+                  <path d="M8 2v16"></path>
+                  <path d="M16 6v16"></path>
+                </svg>
+                <span>AQI Map</span>
+              </div>
               {/* World Map Button */}
               <div className="navs-button" onClick={navigateToWorldMap} title="World Map">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

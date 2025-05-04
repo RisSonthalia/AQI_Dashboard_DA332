@@ -5,7 +5,7 @@ import Footer from '../components/real-time-main-page/Footer';
 import AQIMap from '../components/HomePage/AQIMap';
 import './HomePage.css';
 
-function HomePage() {
+function AQIMapPage() {
   const location = useLocation();
   const initialIsDark = location.state?.isdark ?? true;
   const [isDark, setIsDark] = useState(initialIsDark);
@@ -35,4 +35,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default AQIMapPage;

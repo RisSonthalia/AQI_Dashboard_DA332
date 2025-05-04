@@ -24,13 +24,13 @@ function Footer() {
             <h3 className="heading">About AQI</h3>
             <ul className="list">
               <li className="list-item">
-                <a href="/" className="link">About Us</a>
+                <a href="/about-us" className="link">About Us</a>
               </li>
               <li className="list-item">
-                <a href="/" className="link">Contact Us</a>
+                <a href="/about-us" className="link">Contact Us</a>
               </li>
               <li className="list-item">
-                <a href="/" className="link">Blogs</a>
+                <a href="/about-us" className="link">Blogs</a>
               </li>
             </ul>
           </div>
@@ -43,10 +43,10 @@ function Footer() {
                 <a href="/" className="link">Real-time Analysis</a>
               </li>
               <li className="list-item">
-                <a href="/" className="link">Historical Analysis</a>
+                <a href="/historical" className="link">Historical Analysis</a>
               </li>
               <li className="list-item">
-                <a href="/" className="link">AQI Heatmap</a>
+                <a href="/aqi-map" className="link">AQI Heatmap</a>
               </li>
             </ul>
           </div>
@@ -56,10 +56,10 @@ function Footer() {
             <h3 className="heading">AI Analysis</h3>
             <ul className="list">
               <li className="list-item">
-                <a href="/" className="link">Prediction</a>
+                <a href="/prediction" className="link">Prediction</a>
               </li>
               <li className="list-item">
-                <a href="/" className="link">AQI Chatbot</a>
+                <a href="/aqi-chatbot" className="link">AQI Chatbot</a>
               </li>
             </ul>
           </div>

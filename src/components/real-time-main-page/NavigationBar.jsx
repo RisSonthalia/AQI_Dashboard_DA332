@@ -4,7 +4,7 @@ import './NavigationBar.css';
 
 const NavigationBar = ({ isdark, pollutantData ,selectedStation,historicalData}) => {
   const navItems = [
-    { name: 'AQI', path: '/realtime' },
+    { name: 'AQI', path: '/' },
     { name: 'PM2.5', path: '/pollutant/pm2_5' },
     { name: 'PM10', path: '/pollutant/pm10' },
     { name: 'CO', path: '/pollutant/co' },

@@ -429,17 +429,17 @@ function TopBar({ isDark, toggleDarkMode }) {
       {/* Center Block: Navigation Buttons */}
       <div className="nav-menu-container">
         <div className={`nav-buttons ${menuOpen ? 'open' : ''}`}>
-          <button
+          {/* <button
             className={`nav-button home-btn ${isActive('/') ? 'active' : ''}`}
             onClick={() => handleNavigation('/')}>
             <svg xmlns="http://www.w3.org/2000/svg" className="nav-icon" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
             </svg>
             Home
-          </button>
+          </button> */}
           <button
-            className={`nav-button realtime-btn ${isActive('/realtime') ? 'active' : ''}`}
-            onClick={() => handleNavigation('/realtime')}>
+            className={`nav-button realtime-btn ${isActive('/') ? 'active' : ''}`}
+            onClick={() => handleNavigation('/')}>
             <svg xmlns="http://www.w3.org/2000/svg" className="nav-icon" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.5-11a.5.5 0 00-1 0v4a.5.5 0 00.146.354l2.5 2.5a.5.5 0 10.708-.708L10.5 10.293V7z" clipRule="evenodd" />
             </svg>
@@ -475,6 +475,19 @@ function TopBar({ isDark, toggleDarkMode }) {
               />
             </svg>
             AQI Chatbot
+          </button>
+
+          <button
+            className={`nav-button about-us-btn ${isActive('/about-us') ? 'active' : ''}`}
+            onClick={() => handleNavigation('/about-us')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            About Us
           </button>
         </div>
       </div>
